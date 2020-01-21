@@ -48,7 +48,7 @@
     <xsl:param name="type" required="yes"/>
 	
     <!-- The unique identifier for the group in the ARCHive (digital preservation system).-->
-	<xsl:variable name="uri">INSERT-BASE-URI</xsl:variable>
+	<xsl:variable name="uri">INSERT-GROUP-URI</xsl:variable>
 
     <!-- Combines the identifier from the filename and the aip type.-->
     <!-- Identifier format: rbrl, 3 numbers, 2-5 lowercase letters, a dash, and any number of lowercase letters, numbers or dashes.-->
