@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="http://www.loc.gov/premis/v3"
+	xmlns:premis="http://www.loc.gov/premis/v3"
+ elementFormDefault="qualified">
+
+<!--Purpose: validates the PREMIS elements in a master.xml file-->
+
+	<xs:element name="object">
+		<xs:complexType>
+			<xs:sequence>
+				<!--aip section requires 2 objectIdentifiers (aip-id and version) but filelist only requires 1 so had to go with more permissive rule for it to validate-->
+				<xs:element name="objectIdentifier" type="premis:objectIdentifier" maxOccurs="2" />
+				<xs:element name="objectCategory" type="premis:objectCategory" />
+				<xs:element name="objectCharacteristics" type="premis:objectCharacteristics" />
+				<xs:element name="relationship" type="premis:relationship" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	
+	<!-- requires an element to have some content by checking the string length is at least 1-->
+	<xs:simpleType name="hasString">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1" />
+		</xs:restriction>
+ 	</xs:simpleType>
+				
+ 	<xs:complexType name="objectIdentifier">
+		<xs:sequence>
+			<xs:element name="objectIdentifierType">
+				<xs:simpleType>
+					<!--must a be a uri for the ARCHive-->
+					<xs:restriction base="xs:anyURI">
+						<xs:pattern value="(INSERT-BASE-URI).+" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:element>
+			<xs:element name="objectIdentifierValue" type="premis:hasString" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:simpleType name="objectCategory">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="bitstream" />
+			<xs:enumeration value="file" />
+			<xs:enumeration value="intellectual entity" />
+			<xs:enumeration value="representation" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+
+	<xs:complexType name="objectCharacteristics">
+		<xs:sequence>
+			<xs:element name="size" type="xs:integer" minOccurs="0" />
+			<xs:element name="format" type="premis:format" maxOccurs="unbounded" />
+		</xs:sequence>	
+	</xs:complexType>
+ 
+	<xs:complexType name="format">
+		<xs:sequence>
+			<xs:element name="formatDesignation">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="formatName" type="premis:hasString" />
+                        <xs:element name="version" type="premis:hasString" minOccurs="0" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="formatNote" type="premis:hasString" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="relationship">
+          <xs:sequence>
+               <xs:element name="relationshipType" minOccurs="1">
+                    <xs:simpleType>
+                         <xs:restriction base="xs:string">
+                              <xs:enumeration value="dependency" />
+                              <xs:enumeration value="derivation" />
+                              <xs:enumeration value="logical" />
+                         	<xs:enumeration value="reference" />
+                         	<xs:enumeration value="replacement" />
+                         	<xs:enumeration value="structural" />
+                    	</xs:restriction>	
+                	</xs:simpleType>	
+               </xs:element>
+          	<xs:element name="relationshipSubType">
+                    <xs:simpleType>
+                         <xs:restriction base="xs:string">
+                              <xs:enumeration value="Is Member Of" />
+                         </xs:restriction>	
+                    </xs:simpleType>
+               </xs:element>
+               <xs:element name="relatedObjectIdentifier" maxOccurs="unbounded">
+                    <xs:complexType>
+                         <xs:sequence>
+                              <xs:element name="relatedObjectIdentifierType">
+                                   <xs:simpleType>
+                                        <xs:restriction base="xs:anyURI">
+                                             <xs:minLength value="1" />
+                                        </xs:restriction>
+                                   </xs:simpleType>
+                              </xs:element>
+                              <xs:element name="relatedObjectIdentifierValue" type="premis:hasString" /> 
+                              <xs:element name="relatedObjectSequence" type="xs:integer" minOccurs="0" />
+                         </xs:sequence>
+                    </xs:complexType>
+          	</xs:element>
+          </xs:sequence>
+     </xs:complexType>
+
+</xs:schema>
