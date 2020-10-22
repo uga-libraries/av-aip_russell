@@ -28,7 +28,7 @@ python3 '/path/aip_av.py' '/path/aip-directory'
 
 2. Download the scripts and stylesheets folders and save to your computer.
 3. Update the file path variables (lines 8-10) in the variables.py script for your local machine.
-4. Update the group uri in the mediainfo-to-master.xslt stylesheet in variable name="uri" (line 51). 
+4. Update the group uri in the mediainfo-to-preservation.xslt stylesheet in variable name="uri" (line 51). 
 5. Update the base uri in the premis.xsd in restriction pattern for objectIdentifierType (line 35).
 5. Change permissions on the scripts so they are executable.
 
@@ -43,8 +43,8 @@ See also the [graphical representation of this workflow](https://github.com/uga-
     1. Makes a folder named objects and moves all files and folders into it.
     2. Makes a folder named metadata for script outputs. 
 4. Runs MediaInfo on the objects folder and saves the result in the metadata folder.
-5. Transforms the MediaInfo xml into the master.xml (PREMIS technical metadata) file using saxon and xslt.
-6. Validates the master.xml with xmllint and xsd's.
+5. Transforms the MediaInfo xml into the preservation.xml (PREMIS technical metadata) file using saxon and xslt.
+6. Validates the preservation.xml with xmllint and xsd's.
 7. Bags the aips in place with md5 and sha256 manifests using bagit.py.
 8. Validates the bags using bagit.py.
 9. Runs the perl script prepare_bag on the aip to tar and zip it and saves output to aips-ready-to-ingest.
