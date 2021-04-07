@@ -18,7 +18,7 @@ Script steps:
     4. Determines if the aip contains media or metadata files.
     5. Organizes the aip contents into the aip directory structure.
     6. Extracts technical metadata using MediaInfo.
-    7. Converts technical metatadata to PREMIS (master.xml) using stylesheets.
+    7. Converts technical metatadata to PREMIS (preservation.xml) using stylesheets.
     8. Packages the aips: bag, tar, and zip.
     9. Makes a md5 manifest of all packaged aips.
 """
@@ -67,8 +67,8 @@ current_aip = 0
 if not os.path.exists('mediainfo-xml'):
     os.mkdir('mediainfo-xml')
 
-if not os.path.exists('master-xml'):
-    os.mkdir('master-xml')
+if not os.path.exists('preservation-xml'):
+    os.mkdir('preservation-xml')
 
 if not os.path.exists('aips-to-ingest'):
     os.mkdir('aips-to-ingest')
@@ -82,7 +82,7 @@ for aip in os.listdir(aips_directory):
 
     #Skips folders for script outputs.
 
-    if aip == 'mediainfo-xml' or aip == 'master-xml' or aip == 'aips-to-ingest':
+    if aip == 'mediainfo-xml' or aip == 'preservation-xml' or aip == 'aips-to-ingest':
         continue
 
 
@@ -137,10 +137,10 @@ for aip in os.listdir(aips_directory):
         subprocess.run(f'python3 "{scripts}/mediainfo.py" "{aip}" {aip_type}', shell=True)
 
 
-    # Runs script to transform the MediaInfo xml into the PREMIS master.xml file.
+    # Runs script to transform the MediaInfo xml into the PREMIS preservation.xml file.
 
     if aip in os.listdir('.'):
-        subprocess.run(f'python3 "{scripts}/master_xml.py" "{aip}" {aip_type}', shell=True)
+        subprocess.run(f'python3 "{scripts}/preservation_xml.py" "{aip}" {aip_type}', shell=True)
 
 
     # Runs script to bag the aip, validate the bag, and tar and zip the aip.
