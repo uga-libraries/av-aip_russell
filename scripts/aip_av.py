@@ -1,4 +1,5 @@
-﻿"""Purpose: Creates AIPs from folders of digital audiovisual objects that are ready for ingest into the digital
+﻿# TODO: Update description of the script based on April 2021 changes.
+"""Purpose: Creates AIPs from folders of digital audiovisual objects that are ready for ingest into the digital
 preservation system (ARCHive).
 
 Dependencies: bagit.py, md5deep, mediainfo, saxon, xmllint
@@ -21,6 +22,7 @@ Script steps:
     9. Makes a md5 manifest of all packaged AIPs.
 """
 
+# TODO: Add optional argument for Hargrett.
 # Script usage: python3 '/path/aip_av.py' '/path/aips-directory'
 
 import datetime
@@ -36,18 +38,22 @@ from variables import move_error, scripts
 try:
     aips_directory = sys.argv[1]
 except IndexError:
+    # TODO: more helpful error message.
     print('Incorrect number of arguments.')
     print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
     exit()
 
 # Changes the current directory to the AIPs directory.
 # Prints an error message and ends the script if the directory doesn't exist.
+# TODO: also catch if it is a file instead of a folder
 try:
     os.chdir(aips_directory)
 except FileNotFoundError:
     print(f'The AIPs directory "{aips_directory}" does not exist.')
     print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
     exit()
+
+# TODO: get department from optional argument or default of Russell if none.
 
 # Starts counts for tracking script progress.
 total_aips = len(os.listdir(aips_directory))
@@ -67,6 +73,8 @@ if not os.path.exists('aips-to-ingest'):
 # For one AIP at a time, runs the scripts for all of the workflow steps. If a known error occurs, the AIP is moved to
 # a folder with the error name and the rest of the steps are not completed for that AIP. Checks if the AIP is still
 # present before running each script in case it was moved due to an error in the previous script.
+# TODO: make these functions instead of scripts.
+# TODO: Add a csv log.
 for aip in os.listdir(aips_directory):
 
     # Skips folders for script outputs.
@@ -77,11 +85,15 @@ for aip in os.listdir(aips_directory):
     current_aip += 1
     print(f'\n>>>Processing {aip} ({current_aip} of {total_aips}).')
 
+    # TODO: for Hargrett, parse title from AIP ID and rename folder to AIP ID only [unless rename when package?].
+
     # Deletes files that don't contain one of the strings in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
+    # TODO: add .m4a to keep
     keep = ['.dv', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
     for root, directories, files in os.walk(aip):
         for item in files:
+            # TODO: test endswith instead of in.
             if not(any(s in item.lower() for s in keep)):
                 os.remove(f'{root}/{item}')
 
@@ -95,6 +107,7 @@ for aip in os.listdir(aips_directory):
     # Using a lowercase version of filename so the match isn't case sensitive.
     # The AIP type is part of the AIP name, along with the AIP ID.
     for item in os.listdir(aip):
+        # TODO: test endswith instead of in.
         if 'pdf' in item.lower() or 'xml' in item.lower():
             aip_type = 'metadata'
         else:
@@ -109,6 +122,7 @@ for aip in os.listdir(aips_directory):
         subprocess.run(f'python3 "{scripts}/mediainfo.py" "{aip}" {aip_type}', shell=True)
 
     # Runs script to transform the MediaInfo XML into the PREMIS preservation.xml file.
+    # TODO: work with Hargrett IDs and include Hargrett title.
     if aip in os.listdir('.'):
         subprocess.run(f'python3 "{scripts}/preservation_xml.py" "{aip}" {aip_type}', shell=True)
 
