@@ -18,7 +18,7 @@
 	
 	<xsl:template match="/">
 		<preservation>
-			<dc:title><xsl:value-of select="$aip-id"/></dc:title>
+			<xsl:call-template name="title"/>
 			<dc:rights>http://rightsstatements.org/vocab/InC/1.0/</dc:rights>
 			<aip>
 				<premis:object>
@@ -44,30 +44,53 @@
 	<!-- ************************************************* GLOBAL VARIABLES ******************************************** -->
 	<!-- *************************************************************************************************************** -->
 
-    <!-- The aip type (media or metadata) is given as an argument when running the xslt via the command line or script.-->
-    <xsl:param name="type" required="yes"/>
+    <!-- The parameters are given as arguments when running the xslt via the command line or script.-->
+    <xsl:param name="department" required="yes"/>
+	<xsl:param name="type" required="yes"/>
+	<xsl:param name="title"/>
 	
     <!-- The unique identifier for the group in the ARCHive (digital preservation system).-->
-	<xsl:variable name="uri">INSERT-GROUP-URI</xsl:variable>
+	<xsl:variable name="uri">INSERT-ARCHive-URI/<xsl:value-of select="$department" /></xsl:variable>
 
     <!-- Combines the identifier from the filename and the aip type.-->
-    <!-- Identifier format: rbrl, 3 numbers, 2-5 lowercase letters, a dash, and any number of lowercase letters, numbers or dashes.-->
     <xsl:variable name="aip-id">
-		<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="(rbrl\d{{3}}[a-z]{{2,5}}-[a-z0-9-]+)/objects">
-		 	<xsl:matching-substring>
-		 	    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
-		 	</xsl:matching-substring>
-		</xsl:analyze-string>
+		<!-- Hargrett identifier format: harg-, ms or ua, optional 2 numbers followed by a dash, 4 numbers, er, 4 numbers.-->
+		<xsl:if test="$department='hargrett'">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="(harg-(ms|ua)(\d{{2}}-)?\d{{4}}er\d{{4}})/objects">
+			 	<xsl:matching-substring>
+		 		    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
+		 		</xsl:matching-substring>
+			</xsl:analyze-string>
+		</xsl:if>
+		<!-- Russell identifier format: rbrl, 3 numbers, 2-5 lowercase letters, a dash, and any number of lowercase letters, numbers or dashes.-->
+		<xsl:if test="$department='russell'">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="(rbrl\d{{3}}[a-z]{{2,5}}-[a-z0-9-]+)/objects">
+			 	<xsl:matching-substring>
+		 		    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
+		 		</xsl:matching-substring>
+			</xsl:analyze-string>
+		</xsl:if>
 	</xsl:variable>
 
-    <!-- The start of the identifier in the filename (rbrl followed by 3 numbers).-->
+    <!-- The start of the identifier in the filename.-->
     <!-- The pattern match starts from the beginning because the collection id is repeated in the filepath.-->
     <xsl:variable name="collection-id">
-		<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(rbrl\d{{3}})">
-			<xsl:matching-substring>
-                <xsl:value-of select="regex-group(1)"/>
-            </xsl:matching-substring>
-		</xsl:analyze-string>
+		<!-- Hargrett identifier format: harg-, ms or ua, optional 2 numbers followed by a dash, 4 numbers.-->
+		<xsl:if test="$department='hargrett'">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(harg-(ms|ua)?(\d{{2}}-)?\d{{4}})">
+				<xsl:matching-substring>
+                	<xsl:value-of select="regex-group(1)"/>
+            	</xsl:matching-substring>
+			</xsl:analyze-string>
+		</xsl:if>
+		<!-- Russell identifier format: rbrl followed by 3 numbers.-->
+		<xsl:if test="$department='russell'">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(rbrl\d{{3}})">
+				<xsl:matching-substring>
+                	<xsl:value-of select="regex-group(1)"/>
+            	</xsl:matching-substring>
+			</xsl:analyze-string>
+		</xsl:if>
 	</xsl:variable>
 		
 	<!-- File count to use in testing when aips are treated differently if they have one or multiple files.-->
@@ -148,6 +171,14 @@
 
     <!-- For aips with more than one file, this section has summary information about the aip as a whole.-->
     <!-- For aips with one file, this section has all the details about that file.-->
+
+	<!-- title: value of title parameter for Hargrett and aip id for Russell. -->
+	<xsl:template name="title">
+		<dc:title>
+			<xsl:if test="$department='hargrett'"><xsl:value-of select="$title"/></xsl:if>
+			<xsl:if test="$department='russell'"><xsl:value-of select="$aip-id"/></xsl:if>
+		</dc:title>
+	</xsl:template>
 
 	<!-- aip id: PREMIS 1.1 (required): type is group uri and value is aip id. -->
 	<xsl:template name="aip-id">
@@ -233,7 +264,7 @@
 	</xsl:template>
 	
     <!-- file id: PREMIS 1.1 (required): type is aip uri and value is file identifier.-->
-    <!-- The file identifer is the filepath starting after the objects folder and the filename.-->
+    <!-- The file identifier is the filepath starting after the objects folder and the filename.-->
 	<xsl:template match="@ref">
 		<premis:objectIdentifier>
 			<premis:objectIdentifierType>
