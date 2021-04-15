@@ -185,15 +185,9 @@ total_aips = len(os.listdir(aips_directory))
 current_aip = 0
 
 # Makes folders for script outputs in the AIPs directory, if they don't already exist.
-if not os.path.exists('mediainfo-xml'):
-    os.mkdir('mediainfo-xml')
-
-if not os.path.exists('preservation-xml'):
-    os.mkdir('preservation-xml')
-
-if not os.path.exists('aips-to-ingest'):
-    os.mkdir('aips-to-ingest')
-
+for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
+    if not os.path.exists(directory):
+        os.mkdir(directory)
 
 # For one AIP at a time, runs the scripts for all of the workflow steps. If a known error occurs, the AIP is moved to
 # a folder with the error name and the rest of the steps are not completed for that AIP. Checks if the AIP is still
