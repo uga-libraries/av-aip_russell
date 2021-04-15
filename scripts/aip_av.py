@@ -22,8 +22,8 @@ Script steps:
     9. Makes a md5 manifest of all packaged AIPs.
 """
 
-# TODO: Add optional argument for Hargrett.
-# Script usage: python3 '/path/aip_av.py' '/path/aips-directory'
+# Script usage: python3 '/path/aip_av.py' '/path/aips-directory' [department]
+# Department is an optional argument. If no value is supplied, department defaults to "russell".
 
 import datetime
 import os
@@ -163,22 +163,24 @@ def package(aip, aip_type):
 try:
     aips_directory = sys.argv[1]
 except IndexError:
-    # TODO: more helpful error message.
-    print('Incorrect number of arguments.')
-    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
+    print('The AIPs directory is missing and is a required argument.')
+    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory' [department]")
     exit()
 
 # Changes the current directory to the AIPs directory.
 # Prints an error message and ends the script if the directory doesn't exist.
-# TODO: also catch if it is a file instead of a folder
 try:
     os.chdir(aips_directory)
-except FileNotFoundError:
+except (FileNotFoundError, NotADirectoryError):
     print(f'The AIPs directory "{aips_directory}" does not exist.')
-    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
+    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory' [department]")
     exit()
 
-# TODO: get department from optional argument or default of Russell if none.
+# Calculates the department using the value of the optional argument, if present, or the default value of "russell".
+if len(sys.argv) == 3:
+    department = sys.argv[2]
+else:
+    department = "russell"
 
 # Starts counts for tracking script progress.
 total_aips = len(os.listdir(aips_directory))
