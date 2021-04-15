@@ -30,7 +30,7 @@ import os
 import shutil
 import subprocess
 import sys
-from variables import move_error, scripts
+from variables import *
 
 
 def move_error(error_name, item):
@@ -162,7 +162,8 @@ def package(aip, aip_type):
     # Tars and zips the AIP using a Perl script.
     # The script also adds the uncompressed file size to the filename.
     # The tarred and zipped AIP is saved to the aips-to-ingest folder.
-    subprocess.run(f'perl "{scripts}/prepare_bag" "{bag_name}" aips-to-ingest', shell=True)
+    # TODO: verify if path is needed since it is the same folder as aip_av and if the file extension is needed.
+    subprocess.run(f'perl "{prepare_bag}" "{bag_name}" aips-to-ingest', shell=True)
 
 
 # Gets the AIPs directory from the script argument.
