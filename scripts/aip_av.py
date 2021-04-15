@@ -207,8 +207,7 @@ for aip in os.listdir(aips_directory):
 
     # Deletes files that don't contain one of the strings in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
-    # TODO: add .m4a to keep
-    keep = ['.dv', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
+    keep = ['.dv', '.m4a', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
     for root, directories, files in os.walk(aip):
         for item in files:
             # TODO: test endswith instead of in.
