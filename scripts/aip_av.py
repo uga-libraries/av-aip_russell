@@ -238,22 +238,22 @@ for aip in os.listdir(aips_directory):
         else:
             aip_type = 'media'
 
-    # Runs script to organize the AIP contents into the AIP directory structure.
+    # Organizes the AIP contents into the AIP directory structure.
     if aip in os.listdir('.'):
-        subprocess.run(f'python3 "{scripts}/aip_directory.py" "{aip}"', shell=True)
+        aip_directory(aip)
 
-    # Runs script to extract technical metadata from the files using MediaInfo.
+    # Extracts technical metadata from the files using MediaInfo.
     if aip in os.listdir('.'):
-        subprocess.run(f'python3 "{scripts}/mediainfo.py" "{aip}" {aip_type}', shell=True)
+        mediainfo(aip, aip_type)
 
-    # Runs script to transform the MediaInfo XML into the PREMIS preservation.xml file.
+    # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
     # TODO: work with Hargrett IDs and include Hargrett title.
     if aip in os.listdir('.'):
-        subprocess.run(f'python3 "{scripts}/preservation_xml.py" "{aip}" {aip_type}', shell=True)
+        preservation_xml(aip, aip_type)
 
-    # Runs script to bag the AIP, validate the bag, and tar and zip the AIP.
+    # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip in os.listdir('.'):
-        subprocess.run(f'python3 "{scripts}/package.py" "{aip}" {aip_type}', shell=True)
+        package(aip, aip_type)
 
 # Makes a MD5 manifest of all packaged AIPs in the aips-to-ingest folder using md5deep.
 # The manifest is named current-date_manifest.txt and saved in the aips-to-ingest folder. 
