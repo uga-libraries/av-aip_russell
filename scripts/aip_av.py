@@ -92,16 +92,24 @@ def mediainfo(aip, aip_type):
         shutil.copy2(f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml', 'mediainfo-xml')
 
 
-def preservation_xml(aip, aip_type):
+def preservation_xml(aip, aip_type, aip_title=None):
     """Creates PREMIS and Dublin Core metadata from the MediaInfo xml and saves it as a preservation.xml file."""
+
+    # Paths to files used in the saxon command.
+    mediaxml = f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml'
+    xslt = f'{stylesheets}/mediainfo-to-preservation.xslt'
+    presxml = f'{aip}/metadata/{aip}_{aip_type}_preservation.xml'
+
+    # Arguments to add to the saxon command. Always has type; only Hargrett has title.
+    args = f'type={aip_type}'
+    if aip_title:
+        args += f' title={aip_title}'
+
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and quits this script.
-    media_xml = f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml'
-    xslt = f'{stylesheets}/mediainfo-to-preservation.xslt'
-    pres_xml = f'{aip}/metadata/{aip}_{aip_type}_preservation.xml'
-
-    if os.path.exists(media_xml):
-        subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{media_xml}" -xsl:"{xslt}" -o:"{pres_xml}" type={aip_type}', shell=True)
+    if os.path.exists(mediaxml):
+        subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{mediaxml}" -xsl:"{xslt}" -o:"{presxml}" {args}',
+                       shell=True)
     else:
         move_error('no_mediainfo_xml', aip)
         exit()
@@ -110,7 +118,7 @@ def preservation_xml(aip, aip_type):
     # Possible validation errors:
     #   preservation.xml was not made (failed to loaded)
     #   preservation.xml does not match the metadata requirements (fails to validate)
-    validate = subprocess.run(f'xmllint --noout -schema "{stylesheets}/preservation.xsd" "{pres_xml}"',
+    validate = subprocess.run(f'xmllint --noout -schema "{stylesheets}/preservation.xsd" "{presxml}"',
                               stderr=subprocess.PIPE, shell=True)
 
     # If the preservation.xml isn't valid, moves the AIP to an error folder and saves the validation error to a text
@@ -123,7 +131,7 @@ def preservation_xml(aip, aip_type):
             for line in lines:
                 error.write(f'{line}\n\n')
     else:
-        shutil.copy2(pres_xml, 'preservation-xml')
+        shutil.copy2(presxml, 'preservation-xml')
 
 
 def package(aip, aip_type):
@@ -160,7 +168,6 @@ def package(aip, aip_type):
     # Tars and zips the AIP using a Perl script.
     # The script also adds the uncompressed file size to the filename.
     # The tarred and zipped AIP is saved to the aips-to-ingest folder.
-    # TODO: verify if path is needed since it is the same folder as aip_av and if the file extension is needed.
     subprocess.run(f'perl "{prepare_bag}" "{bag_name}" aips-to-ingest', shell=True)
 
 
@@ -261,9 +268,8 @@ for aip_folder in os.listdir(aips_directory):
         mediainfo(aip_id, aip_type)
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
-    # TODO: work with Hargrett IDs and include Hargrett title.
     if aip_id in os.listdir('.'):
-        preservation_xml(aip_id, aip_type)
+        preservation_xml(aip_id, aip_type, title)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_id in os.listdir('.'):
