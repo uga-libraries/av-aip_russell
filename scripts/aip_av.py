@@ -268,8 +268,12 @@ for aip_folder in os.listdir(aips_directory):
         mediainfo(aip_id, aip_type)
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
+    # Only include optional title parameter for Hargrett.
     if aip_id in os.listdir('.'):
-        preservation_xml(aip_id, aip_type, department, title)
+        if department == 'hargrett':
+            preservation_xml(aip_id, aip_type, department, title)
+        else:
+            preservation_xml(aip_id, aip_type, department)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_id in os.listdir('.'):
