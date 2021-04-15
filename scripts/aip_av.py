@@ -24,6 +24,7 @@ Script steps:
 
 # Script usage: python3 '/path/aip_av.py' '/path/aips-directory'
 
+import csv
 import datetime
 import os
 import shutil
@@ -34,10 +35,18 @@ from variables import move_error, scripts
 
 def move_error(error_name, item):
     """Move the AIP folder to an error folder, named with the error, so the rest of the workflow steps are not run on
-    the AIP. """
+    the AIP. Also adds the AIP and the error to a log for easier staff review."""
+
+    # Makes error folder and moves the AIP to that folder.
     if not os.path.exists(f'errors/{error_name}'):
         os.makedirs(f'errors/{error_name}')
     os.replace(item, f'errors/{error_name}/{item}')
+
+    # Adds the error to a CSV in the AIPs directory.
+    # TODO: add a header row if the file is currently empty.
+    with open('log.csv', 'a', newline='') as log_file:
+        log_writer = csv.writer(log_file)
+        log_writer.writerow([item, error_name])
 
 
 def aip_directory(aip):
@@ -187,7 +196,6 @@ for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
 # For one AIP at a time, runs the scripts for all of the workflow steps. If a known error occurs, the AIP is moved to
 # a folder with the error name and the rest of the steps are not completed for that AIP. Checks if the AIP is still
 # present before running each script in case it was moved due to an error in the previous script.
-# TODO: Add a csv log.
 for aip_folder in os.listdir(aips_directory):
 
     # Skips folders for script outputs.
@@ -262,10 +270,16 @@ for aip_folder in os.listdir(aips_directory):
     if aip in os.listdir('.'):
         package(aip, aip_type)
 
+    # Adds the AIP to the log for successfully completing.
+    with open('log.csv', 'a', newline='') as log_file:
+        log_writer = csv.writer(log_file)
+        log_writer.writerow([aip, "Complete"])
+
 # Makes a MD5 manifest of all packaged AIPs in the aips-to-ingest folder using md5deep.
 # The manifest is named current-date_manifest.txt and saved in the aips-to-ingest folder. 
 # The manifest has one line per AIP, formatted md5<tab>filename
 # Checks that aips-to-ingest is not empty (due to errors) before making the manifest.
+# TODO: split hargrett and russell manifests if want to process as mixed batches.
 os.chdir('aips-to-ingest')
 current_date = datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
 if not len(os.listdir()) == 0:
