@@ -22,8 +22,7 @@ Script steps:
     9. Makes a md5 manifest of all packaged AIPs.
 """
 
-# Script usage: python3 '/path/aip_av.py' '/path/aips-directory' [department]
-# Department is an optional argument. If no value is supplied, department defaults to "russell".
+# Script usage: python3 '/path/aip_av.py' '/path/aips-directory'
 
 import datetime
 import os
@@ -176,13 +175,6 @@ except (FileNotFoundError, NotADirectoryError):
     print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory' [department]")
     exit()
 
-# Calculates the department using the value of the optional argument, if present, or the default value of "russell".
-# TODO: error handling for how hargrett is formatted, assume a 2nd agrument == Hargrett, or get from aip id instead?
-if len(sys.argv) == 3:
-    department = sys.argv[2]
-else:
-    department = "russell"
-
 # Starts counts for tracking script progress.
 total_aips = len(os.listdir(aips_directory))
 current_aip = 0
@@ -206,13 +198,21 @@ for aip_folder in os.listdir(aips_directory):
     current_aip += 1
     print(f'\n>>>Processing {aip_folder} ({current_aip} of {total_aips}).')
 
-    # For Hargrett, parse the title from AIP ID (AIP folder is formatted id_title) and rename folder to the AIP ID only.
+    # Determines the department based on the start of the AIP folder name.
+    if aip_folder.startswith('harg'):
+        department = 'hargrett'
+    elif aip_folder.startswith('rbrl'):
+        department = 'russell'
+    else:
+        move_error('department_unknown', aip_folder)
+
+    # For Hargrett, gets the AIP ID and title from the AIP folder name and renames the folder to the AIP ID only.
     # If the AIP folder cannot be parsed, moves the AIP to an error folder and starts processing the next AIP.
     if department == "hargrett":
         try:
             aip, title = aip_folder.split("_")
         except ValueError:
-            aip.move_error('hargrett_folder_name', aip_folder)
+            move_error('hargrett_folder_name', aip_folder)
             continue
         os.replace(aip_folder, aip)
     # For Russell, set a variable aip equal to the AIP ID, which is just the AIP folder, to keep variable names
