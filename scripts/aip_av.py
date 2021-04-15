@@ -205,13 +205,12 @@ for aip in os.listdir(aips_directory):
 
     # TODO: for Hargrett, parse title from AIP ID and rename folder to AIP ID only [unless rename when package?].
 
-    # Deletes files that don't contain one of the strings in the keep list.
+    # Deletes files if the file extension is not in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
     keep = ['.dv', '.m4a', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
     for root, directories, files in os.walk(aip):
         for item in files:
-            # TODO: test endswith instead of in.
-            if not(any(s in item.lower() for s in keep)):
+            if not(any(item.lower().endswith(s) for s in keep)):
                 os.remove(f'{root}/{item}')
 
     # If deleting the unwanted files left the AIP folder empty,
@@ -220,12 +219,11 @@ for aip in os.listdir(aips_directory):
         move_error('all_files_deleted', aip)
         continue
 
-    # Determines the AIP type (metadata or media) based on keywords in the filenames of the digital objects.
+    # Determines the AIP type (metadata or media) based on the file extensions of the digital objects.
     # Using a lowercase version of filename so the match isn't case sensitive.
     # The AIP type is part of the AIP name, along with the AIP ID.
     for item in os.listdir(aip):
-        # TODO: test endswith instead of in.
-        if 'pdf' in item.lower() or 'xml' in item.lower():
+        if item.lower().endswith('.pdf') or item.lower().endswith('.xml'):
             aip_type = 'metadata'
         else:
             aip_type = 'media'
