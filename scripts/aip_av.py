@@ -177,6 +177,7 @@ except (FileNotFoundError, NotADirectoryError):
     exit()
 
 # Calculates the department using the value of the optional argument, if present, or the default value of "russell".
+# TODO: error handling for how hargrett is formatted, assume a 2nd agrument == Hargrett, or get from aip id instead?
 if len(sys.argv) == 3:
     department = sys.argv[2]
 else:
@@ -195,17 +196,29 @@ for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
 # a folder with the error name and the rest of the steps are not completed for that AIP. Checks if the AIP is still
 # present before running each script in case it was moved due to an error in the previous script.
 # TODO: Add a csv log.
-for aip in os.listdir(aips_directory):
+for aip_folder in os.listdir(aips_directory):
 
     # Skips folders for script outputs.
-    if aip in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
+    if aip_folder in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
         continue
 
     # Updates the current AIP number and displays the script progress.
     current_aip += 1
-    print(f'\n>>>Processing {aip} ({current_aip} of {total_aips}).')
+    print(f'\n>>>Processing {aip_folder} ({current_aip} of {total_aips}).')
 
-    # TODO: for Hargrett, parse title from AIP ID and rename folder to AIP ID only [unless rename when package?].
+    # For Hargrett, parse the title from AIP ID (AIP folder is formatted id_title) and rename folder to the AIP ID only.
+    # If the AIP folder cannot be parsed, moves the AIP to an error folder and starts processing the next AIP.
+    if department == "hargrett":
+        try:
+            aip, title = aip_folder.split("_")
+        except ValueError:
+            aip.move_error('hargrett_folder_name', aip_folder)
+            continue
+        os.replace(aip_folder, aip)
+    # For Russell, set a variable aip equal to the AIP ID, which is just the AIP folder, to keep variable names
+    # consistent for the rest of the script for Hargrett and Russell.
+    else:
+        aip = aip_folder
 
     # Deletes files if the file extension is not in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
