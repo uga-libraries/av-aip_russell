@@ -92,7 +92,7 @@ def mediainfo(aip, aip_type):
         shutil.copy2(f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml', 'mediainfo-xml')
 
 
-def preservation_xml(aip, aip_type, aip_title=None):
+def preservation_xml(aip, aip_type, department, aip_title=None):
     """Creates PREMIS and Dublin Core metadata from the MediaInfo xml and saves it as a preservation.xml file."""
 
     # Paths to files used in the saxon command.
@@ -100,8 +100,8 @@ def preservation_xml(aip, aip_type, aip_title=None):
     xslt = f'{stylesheets}/mediainfo-to-preservation.xslt'
     presxml = f'{aip}/metadata/{aip}_{aip_type}_preservation.xml'
 
-    # Arguments to add to the saxon command. Always has type; only Hargrett has title.
-    args = f'type={aip_type}'
+    # Arguments to add to the saxon command. Always has type and department; only Hargrett has title.
+    args = f'type={aip_type} department={department}'
     if aip_title:
         args += f' title={aip_title}'
 
@@ -269,7 +269,7 @@ for aip_folder in os.listdir(aips_directory):
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
     if aip_id in os.listdir('.'):
-        preservation_xml(aip_id, aip_type, title)
+        preservation_xml(aip_id, aip_type, department, title)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_id in os.listdir('.'):
