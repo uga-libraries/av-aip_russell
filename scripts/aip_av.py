@@ -192,12 +192,11 @@ for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
 # For one AIP at a time, runs the scripts for all of the workflow steps. If a known error occurs, the AIP is moved to
 # a folder with the error name and the rest of the steps are not completed for that AIP. Checks if the AIP is still
 # present before running each script in case it was moved due to an error in the previous script.
-# TODO: make these functions instead of scripts.
 # TODO: Add a csv log.
 for aip in os.listdir(aips_directory):
 
     # Skips folders for script outputs.
-    if aip == 'mediainfo-xml' or aip == 'preservation-xml' or aip == 'aips-to-ingest':
+    if aip in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
         continue
 
     # Updates the current AIP number and displays the script progress.
