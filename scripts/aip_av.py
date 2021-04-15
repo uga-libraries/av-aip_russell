@@ -94,25 +94,23 @@ def mediainfo(aip, aip_type):
 
 def preservation_xml(aip, aip_type):
     """Creates PREMIS and Dublin Core metadata from the MediaInfo xml and saves it as a preservation.xml file."""
-    # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata folder.
-    # If the mediainfo.xml is not present, moves the AIP to an error folder and quits this script.
-    mediainfo = f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml'
-    stylesheet = f'{stylesheets}/mediainfo-to-preservation.xslt'
-    preservationxml = f'{aip}/metadata/{aip}_{aip_type}_preservation.xml'
+    # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
+    # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and quits this script.
+    media_xml = f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml'
+    xslt = f'{stylesheets}/mediainfo-to-preservation.xslt'
+    pres_xml = f'{aip}/metadata/{aip}_{aip_type}_preservation.xml'
 
-    if os.path.exists(mediainfo):
-        subprocess.run(
-            f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{mediainfo}" -xsl:"{stylesheet}" -o:"{preservationxml}" type={aip_type}',
-            shell=True)
+    if os.path.exists(media_xml):
+        subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{media_xml}" -xsl:"{xslt}" -o:"{pres_xml}" type={aip_type}', shell=True)
     else:
         move_error('no_mediainfo_xml', aip)
         exit()
 
-    # Validates the preservation.xml against the requirements of the UGA Libraries' digital preservation system (ARCHive).
+    # Validates the preservation.xml against the requirements of the Libraries' digital preservation system (ARCHive).
     # Possible validation errors:
     #   preservation.xml was not made (failed to loaded)
     #   preservation.xml does not match the metadata requirements (fails to validate)
-    validate = subprocess.run(f'xmllint --noout -schema "{stylesheets}/preservation.xsd" "{preservationxml}"',
+    validate = subprocess.run(f'xmllint --noout -schema "{stylesheets}/preservation.xsd" "{pres_xml}"',
                               stderr=subprocess.PIPE, shell=True)
 
     # If the preservation.xml isn't valid, moves the AIP to an error folder and saves the validation error to a text
@@ -125,7 +123,7 @@ def preservation_xml(aip, aip_type):
             for line in lines:
                 error.write(f'{line}\n\n')
     else:
-        shutil.copy2(preservationxml, 'preservation-xml')
+        shutil.copy2(pres_xml, 'preservation-xml')
 
 
 def package(aip, aip_type):
@@ -221,60 +219,60 @@ for aip_folder in os.listdir(aips_directory):
     # If the AIP folder cannot be parsed, moves the AIP to an error folder and starts processing the next AIP.
     if department == "hargrett":
         try:
-            aip, title = aip_folder.split("_")
+            aip_id, title = aip_folder.split("_")
         except ValueError:
             move_error('hargrett_folder_name', aip_folder)
             continue
-        os.replace(aip_folder, aip)
+        os.replace(aip_folder, aip_id)
     # For Russell, set a variable aip equal to the AIP ID, which is just the AIP folder, to keep variable names
     # consistent for the rest of the script for Hargrett and Russell.
     else:
-        aip = aip_folder
+        aip_id = aip_folder
 
     # Deletes files if the file extension is not in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
     keep = ['.dv', '.m4a', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
-    for root, directories, files in os.walk(aip):
-        for item in files:
-            if not(any(item.lower().endswith(s) for s in keep)):
-                os.remove(f'{root}/{item}')
+    for root, directories, files in os.walk(aip_id):
+        for file in files:
+            if not (any(file.lower().endswith(s) for s in keep)):
+                os.remove(f'{root}/{file}')
 
     # If deleting the unwanted files left the AIP folder empty,
     # moves the AIP to an error folder and starts processing the next AIP.
-    if len(os.listdir(aip)) == 0:
-        move_error('all_files_deleted', aip)
+    if len(os.listdir(aip_id)) == 0:
+        move_error('all_files_deleted', aip_id)
         continue
 
     # Determines the AIP type (metadata or media) based on the file extensions of the digital objects.
     # Using a lowercase version of filename so the match isn't case sensitive.
     # The AIP type is part of the AIP name, along with the AIP ID.
-    for item in os.listdir(aip):
-        if item.lower().endswith('.pdf') or item.lower().endswith('.xml'):
+    for file in os.listdir(aip_id):
+        if file.lower().endswith('.pdf') or file.lower().endswith('.xml'):
             aip_type = 'metadata'
         else:
             aip_type = 'media'
 
     # Organizes the AIP contents into the AIP directory structure.
-    if aip in os.listdir('.'):
-        aip_directory(aip)
+    if aip_id in os.listdir('.'):
+        aip_directory(aip_id)
 
     # Extracts technical metadata from the files using MediaInfo.
-    if aip in os.listdir('.'):
-        mediainfo(aip, aip_type)
+    if aip_id in os.listdir('.'):
+        mediainfo(aip_id, aip_type)
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
     # TODO: work with Hargrett IDs and include Hargrett title.
-    if aip in os.listdir('.'):
-        preservation_xml(aip, aip_type)
+    if aip_id in os.listdir('.'):
+        preservation_xml(aip_id, aip_type)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
-    if aip in os.listdir('.'):
-        package(aip, aip_type)
+    if aip_id in os.listdir('.'):
+        package(aip_id, aip_type)
 
     # Adds the AIP to the log for successfully completing.
     with open('log.csv', 'a', newline='') as log_file:
         log_writer = csv.writer(log_file)
-        log_writer.writerow([aip, "Complete"])
+        log_writer.writerow([aip_id, "Complete"])
 
 # Makes a MD5 manifest of all packaged AIPs in the aips-to-ingest folder using md5deep.
 # The manifest is named current-date_manifest.txt and saved in the aips-to-ingest folder. 
