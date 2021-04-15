@@ -199,12 +199,14 @@ for aip_folder in os.listdir(aips_directory):
     print(f'\n>>>Processing {aip_folder} ({current_aip} of {total_aips}).')
 
     # Determines the department based on the start of the AIP folder name.
+    # If it does not start with an expected value, moves the AIP to an error folder and starts processing the next AIP.
     if aip_folder.startswith('harg'):
         department = 'hargrett'
     elif aip_folder.startswith('rbrl'):
         department = 'russell'
     else:
         move_error('department_unknown', aip_folder)
+        continue
 
     # For Hargrett, gets the AIP ID and title from the AIP folder name and renames the folder to the AIP ID only.
     # If the AIP folder cannot be parsed, moves the AIP to an error folder and starts processing the next AIP.
