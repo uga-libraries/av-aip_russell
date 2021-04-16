@@ -61,7 +61,7 @@ def move_error(error_name, item):
 
 def aip_metadata(aip_folder_name):
     """Returns the department, AIP ID, and title based on the AIP folder name.
-    If any value cannot be determined, raises an error."""
+    If any values cannot be calculated, raises an error."""
 
     # Determines the department based on the start of the AIP folder name.
     # If it does not start with an expected value, raises an error so processing can stop on this AIP.
@@ -70,6 +70,7 @@ def aip_metadata(aip_folder_name):
     elif aip_folder_name.startswith('rbrl'):
         department = 'russell'
     else:
+        move_error("department_unknown", aip_folder_name)
         raise ValueError
 
     # For Hargrett, gets the AIP ID and title from the AIP folder name and renames the folder to the AIP ID only.
@@ -80,6 +81,7 @@ def aip_metadata(aip_folder_name):
             # todo: title can have underscores so need to use regex
             aip_id, title = aip_folder.split("_")
         except ValueError:
+            move_error("aip_folder_name", aip_folder_name)
             raise ValueError
         os.replace(aip_folder, aip_id)
     else:
@@ -100,9 +102,9 @@ def delete_files(aip):
             if not (any(file.lower().endswith(s) for s in keep)):
                 os.remove(f'{root}/{file}')
 
-    # If deleting the unwanted files left the AIP folder empty, raises an error.
+    # If deleting the unwanted files left the AIP folder empty, moves the AIP to an error folder.
     if len(os.listdir(aip)) == 0:
-        raise ValueError
+        move_error("all_files_deleted", aip)
 
 
 def aip_directory(aip):
@@ -275,16 +277,11 @@ for aip_folder in os.listdir(aips_directory):
     try:
         department, aip_id, title = aip_metadata(aip_folder)
     except ValueError:
-        move_error('aip_folder_name', aip_folder)
         continue
 
     # Deletes files if the file extension is not in the keep list.
     if aip_id in os.listdir('.'):
-        try:
-            delete_files(aip_id)
-        except ValueError:
-            move_error('all_files_deleted', aip_id)
-            continue
+        delete_files(aip_id)
 
     # Determines the AIP type (metadata or media) based on the file extensions of the digital objects.
     # Known issue: for this to work, the folder must only contain metadata or media files, not both.
