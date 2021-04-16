@@ -113,14 +113,13 @@ def aip_directory(aip):
     objects to the objects folder. """
 
     # Makes the objects folder within the AIP folder, if it doesn't exist. If there is already a folder named objects
-    # in the first level within the AIP folder, moves the AIP to an error folder and quits this script. Do not want
+    # in the first level within the AIP folder, moves the AIP to an error folder and quits this function. Do not want
     # to alter the original directory structure by adding to an original folder named objects.
-    # TODO: don't quit the script
     try:
         os.mkdir(f'{aip}/objects')
     except FileExistsError:
         move_error('preexisting_objects_folder', aip)
-        exit()
+        return
 
     # Moves the contents of the AIP folder into the objects folder.
     for item in os.listdir(aip):
@@ -166,14 +165,12 @@ def preservation_xml(aip, aip_type, department, aip_title=None):
         args += f' title={aip_title}'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
-    # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and quits this script.
-    # TODO: don't quit the script
+    # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and quits this function.
     if os.path.exists(mediaxml):
         subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{mediaxml}" -xsl:"{xslt}" -o:"{presxml}" {args}',
                        shell=True)
     else:
         move_error('no_mediainfo_xml', aip)
-        exit()
 
     # Validates the preservation.xml against the requirements of the Libraries' digital preservation system (ARCHive).
     # Possible validation errors:
@@ -215,9 +212,8 @@ def package(aip, aip_type):
     os.replace(aip, bag_name)
 
     # Validates the bag. If the bag is not valid, moves the AIP to an error folder, saves the validation error to a
-    # document in the error folder, and quits this script. The validation output is converted from a byte type to a
+    # document in the error folder, and quits this function. The validation output is converted from a byte type to a
     # string for easier formatting. The error document is formatted so each error is its own line.
-    # TODO: don't quit the script
     validate = subprocess.run(f'bagit.py --validate --quiet "{bag_name}"', stderr=subprocess.PIPE, shell=True)
 
     if 'invalid' in str(validate):
@@ -226,7 +222,7 @@ def package(aip, aip_type):
             lines = str(validate.stderr).split(';')
             for line in lines:
                 error.write(f'{line}\n\n')
-        exit()
+        return
 
     # Tars and zips the AIP using a Perl script.
     # The script also adds the uncompressed file size to the filename.
