@@ -272,7 +272,6 @@ for aip_folder in os.listdir(aips_directory):
     print(f'\n>>>Processing {aip_folder} ({current_aip} of {total_aips}).')
 
     # Determines the department, AIP ID, and for Hargrett the title, from the AIP folder name.
-    # If either value cannot be calculated, moves the AIP to an error folder and starts processing the next AIP.
     try:
         department, aip_id, title = aip_metadata(aip_folder)
     except ValueError:
@@ -280,7 +279,6 @@ for aip_folder in os.listdir(aips_directory):
         continue
 
     # Deletes files if the file extension is not in the keep list.
-    # If all files are deleted, moves the AIP to an error folder and starts processing the next AIP.
     if aip_id in os.listdir('.'):
         try:
             delete_files(aip_id)
@@ -289,6 +287,7 @@ for aip_folder in os.listdir(aips_directory):
             continue
 
     # Determines the AIP type (metadata or media) based on the file extensions of the digital objects.
+    # Known issue: for this to work, the folder must only contain metadata or media files, not both.
     # Using a lowercase version of filename so the match isn't case sensitive.
     # The AIP type is part of the AIP name, along with the AIP ID.
     if aip_id in os.listdir('.'):
