@@ -284,15 +284,17 @@ for aip_folder in os.listdir(aips_directory):
         log_writer = csv.writer(log_file)
         log_writer.writerow([aip_id, "Complete"])
 
-# Makes a MD5 manifest of all packaged AIPs in the aips-to-ingest folder using md5deep.
-# The manifest is named current-date_manifest.txt and saved in the aips-to-ingest folder. 
+# Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5deep.
+# The manifest is named current-date_department_manifest.txt and saved in the aips-to-ingest folder.
 # The manifest has one line per AIP, formatted md5<tab>filename
 # Checks that aips-to-ingest is not empty (due to errors) before making the manifest.
-# TODO: split hargrett and russell manifests if want to process as mixed batches.
 os.chdir('aips-to-ingest')
 current_date = datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
 if not len(os.listdir()) == 0:
-    subprocess.run(f'md5deep -b * > {current_date}_manifest.txt', shell=True)
+    if any(file.startswith('harg') for file in os.listdir('.')):
+        subprocess.run(f'md5deep -b * > {current_date}_hargrett_manifest.txt', shell=True)
+    if any(file.startswith('rbrl') for file in os.listdir('.')):
+        subprocess.run(f'md5deep -b * > {current_date}_russell_manifest.txt', shell=True)
 else:
     print('Could not make manifest. aips-to-ingest is empty.')
 
