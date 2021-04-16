@@ -18,7 +18,7 @@ Script steps:
     5. Determines if the AIP contains media or metadata files.
     6. Organizes the AIP contents into the AIP directory structure.
     7. Extracts technical metadata using MediaInfo.
-    8. Converts technical metadata to PREMIS (preservation.xml) using a stylesheet.
+    8. Converts technical metadata to Dublin Core and PREMIS (preservation.xml) using a stylesheet.
     9. Packages the AIPs: bag, tar, and zip.
    10. Makes a md5 manifest of all packaged AIPs.
 
@@ -38,26 +38,25 @@ from variables import *
 
 
 def log(aip, message):
-    """Saves the aip and a message (the error or that processing completed) to the log file, which is a CSV saved in
-    the AIPs directory. This is a function, even though it is only a few lines, because it is used in multiple places
-    in the script. """
+    """Saves the AIP name and a message (the error or that processing completed) to the log file,
+    which is a CSV saved in the AIPs directory. """
 
     with open('log.csv', 'a', newline='') as log_file:
         log_writer = csv.writer(log_file)
         log_writer.writerow([aip, message])
 
 
-def move_error(error_name, item):
-    """Move the AIP folder to an error folder, named with the error, so the rest of the workflow steps are not run on
+def move_error(error_name, aip):
+    """Moves the AIP folder to an error folder, named with the error, so the rest of the workflow steps are not run on
     the AIP. Also adds the AIP and the error to a log for easier staff review."""
 
-    # Makes error folder and moves the AIP to that folder.
+    # Makes the error folder, if it does not already exist, and moves the AIP to that folder.
     if not os.path.exists(f'errors/{error_name}'):
         os.makedirs(f'errors/{error_name}')
-    os.replace(item, f'errors/{error_name}/{item}')
+    os.replace(aip, f'errors/{error_name}/{aip}')
 
-    # Adds the error to a CSV in the AIPs directory.
-    log(item, error_name)
+    # Adds the error to a log in the AIPs directory.
+    log(aip, error_name)
 
 
 def aip_metadata(aip_folder_name):
@@ -71,21 +70,21 @@ def aip_metadata(aip_folder_name):
     elif aip_folder_name.startswith('rbrl'):
         department = 'russell'
     else:
-        move_error("department_unknown", aip_folder_name)
+        move_error('department_unknown', aip_folder_name)
         raise ValueError
 
     # For Hargrett, gets the AIP ID and title from the AIP folder name and renames the folder to the AIP ID only.
-    # If the AIP folder cannot be parsed, moves the AIP to an error folder and starts processing the next AIP.
-    # For Russell, the AIP folder is the AIP ID and the title is None.
+    # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
     if department == "hargrett":
         try:
             regex = re.match('^(harg-(ms|ua)([0-9]{{2}}-)?[0-9]{{4}}(er)[0-9]{{4}})_(.*)', aip_folder_name)
-            aip_id = regex.group()
-            title = regex.group()
+            aip_id = regex.group(1)
+            title = regex.group(5)
         except ValueError:
             move_error("aip_folder_name", aip_folder_name)
             raise ValueError
         os.replace(aip_folder, aip_id)
+    # For Russell, the AIP folder is the AIP ID. The AIP title is made later by combining the AIP ID and type.
     else:
         aip_id = aip_folder_name
         title = None
@@ -94,7 +93,7 @@ def aip_metadata(aip_folder_name):
 
 
 def delete_files(aip):
-    """Deletes unwanted files based on their file extension and raises an error if no files are left."""
+    """Deletes unwanted files based on their file extension."""
 
     # Deletes files if the file extension is not in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
@@ -116,6 +115,7 @@ def aip_directory(aip):
     # Makes the objects folder within the AIP folder, if it doesn't exist. If there is already a folder named objects
     # in the first level within the AIP folder, moves the AIP to an error folder and quits this script. Do not want
     # to alter the original directory structure by adding to an original folder named objects.
+    # TODO: don't quit the script
     try:
         os.mkdir(f'{aip}/objects')
     except FileExistsError:
@@ -123,7 +123,6 @@ def aip_directory(aip):
         exit()
 
     # Moves the contents of the AIP folder into the objects folder.
-    # Skips the objects folder because it is an error to try to move something into itself.
     for item in os.listdir(aip):
         if item == 'objects':
             continue
@@ -136,6 +135,7 @@ def aip_directory(aip):
 
 def mediainfo(aip, aip_type):
     """Extracts technical metadata from the files in the objects folder using MediaInfo."""
+
     # Runs MediaInfo on the contents of the objects folder and saves the xml output to the metadata folder.
     # --'Output=XML' uses the XML structure that started with MediaInfo 18.03
     # --'Language=raw' outputs the size in bytes.
@@ -143,7 +143,7 @@ def mediainfo(aip, aip_type):
         f'mediainfo -f --Output=XML --Language=raw "{aip}/objects" > "{aip}/metadata/{aip}_{aip_type}_mediainfo.xml"',
         shell=True)
 
-    # Copies mediainfo xml to a separate folder (mediainfo-xml) for staff reference.
+    # Copies the MediaInfo XML to a separate folder (mediainfo-xml) for staff reference.
     # If a file by that name is already in mediainfo-xml,
     #   moves the AIP to an error folder instead since the AIP may be a duplicate.
     if os.path.exists(f'mediainfo-xml/{aip}_{aip_type}_mediainfo.xml'):
@@ -153,7 +153,7 @@ def mediainfo(aip, aip_type):
 
 
 def preservation_xml(aip, aip_type, department, aip_title=None):
-    """Creates PREMIS and Dublin Core metadata from the MediaInfo xml and saves it as a preservation.xml file."""
+    """Creates PREMIS and Dublin Core metadata from the MediaInfo XML and saves it as a preservation.xml file."""
 
     # Paths to files used in the saxon command.
     mediaxml = f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml'
@@ -167,6 +167,7 @@ def preservation_xml(aip, aip_type, department, aip_title=None):
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and quits this script.
+    # TODO: don't quit the script
     if os.path.exists(mediaxml):
         subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{mediaxml}" -xsl:"{xslt}" -o:"{presxml}" {args}',
                        shell=True)
@@ -182,7 +183,7 @@ def preservation_xml(aip, aip_type, department, aip_title=None):
                               stderr=subprocess.PIPE, shell=True)
 
     # If the preservation.xml isn't valid, moves the AIP to an error folder and saves the validation error to a text
-    # document in the error folder. If the preservation.xml is valid, copies the preservation.xml to local server for
+    # document in the error folder. If the preservation.xml is valid, copies the preservation.xml to another folder for
     # staff use.
     if 'failed to load' in str(validate) or 'fails to validate' in str(validate):
         move_error('preservation_invalid', aip)
@@ -196,8 +197,9 @@ def preservation_xml(aip, aip_type, department, aip_title=None):
 
 def package(aip, aip_type):
     """Bags, tars, and zips the AIP."""
-    # Deletes any .DS_Store files because they cause errors with bag validation.
-    # They would have been deleted in aip_av.py, but can be regenerated while the script is running.
+
+    # Deletes any .DS_Store files because they cause errors with bag validation. They would have been deleted by
+    # delete_files() earlier in the script, but can be regenerated while the script is running.
     for root, dirs, files in os.walk('.'):
         for item in files:
             if item == '.DS_Store':
@@ -208,13 +210,14 @@ def package(aip, aip_type):
     subprocess.run(f'bagit.py --md5 --sha256 --quiet "{aip}"', shell=True)
 
     # Renames the AIP folder to add the AIP type and '_bag' to the end.
-    # This is saved to a variable first since it is used a few more times in the script.
+    # This is saved to a variable first since it is used a few more times in the function.
     bag_name = f'{aip}_{aip_type}_bag'
     os.replace(aip, bag_name)
 
     # Validates the bag. If the bag is not valid, moves the AIP to an error folder, saves the validation error to a
     # document in the error folder, and quits this script. The validation output is converted from a byte type to a
     # string for easier formatting. The error document is formatted so each error is its own line.
+    # TODO: don't quit the script
     validate = subprocess.run(f'bagit.py --validate --quiet "{bag_name}"', stderr=subprocess.PIPE, shell=True)
 
     if 'invalid' in str(validate):
@@ -242,19 +245,19 @@ except IndexError:
     exit()
 
 # Changes the current directory to the AIPs directory.
-# Prints an error message and ends the script if the directory doesn't exist.
+# Prints an error message and ends the script if the directory doesn't exist or is a file instead of a directory.
 try:
     os.chdir(aips_directory)
 except (FileNotFoundError, NotADirectoryError):
-    print(f'The AIPs directory "{aips_directory}" does not exist.')
-    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory' [department]")
+    print(f'The AIPs directory "{aips_directory}" is not a valid directory.')
+    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
     exit()
 
-# Starts counts for tracking script progress.
+# Starts counts for tracking the script progress.
 total_aips = len(os.listdir(aips_directory))
 current_aip = 0
 
-# Makes folders for script outputs in the AIPs directory, if they don't already exist.
+# Makes folders for the script outputs in the AIPs directory, if they don't already exist.
 for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
     if not os.path.exists(directory):
         os.mkdir(directory)
@@ -262,12 +265,12 @@ for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
 # Makes a log file, with a header row, in the AIPs directory.
 log("AIP", "Status")
 
-# For one AIP at a time, runs the scripts for all of the workflow steps. If a known error occurs, the AIP is moved to
+# For one AIP at a time, runs the functions for all of the workflow steps. If a known error occurs, the AIP is moved to
 # a folder with the error name and the rest of the steps are not completed for that AIP. Checks if the AIP is still
-# present before running each script in case it was moved due to an error in the previous script.
+# present before running each function in case it was moved due to an error in the previous function.
 for aip_folder in os.listdir(aips_directory):
 
-    # Skips folders for script outputs.
+    # Skips folders for script outputs and the log file.
     if aip_folder in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest', 'log.csv']:
         continue
 
@@ -281,7 +284,7 @@ for aip_folder in os.listdir(aips_directory):
     except ValueError:
         continue
 
-    # Deletes files if the file extension is not in the keep list.
+    # Deletes undesired files based on the file extension.
     if aip_id in os.listdir('.'):
         delete_files(aip_id)
 
@@ -305,7 +308,7 @@ for aip_folder in os.listdir(aips_directory):
         mediainfo(aip_id, aip_type)
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
-    # Only include optional title parameter for Hargrett.
+    # Only includes the optional title parameter for Hargrett.
     if aip_id in os.listdir('.'):
         if department == 'hargrett':
             preservation_xml(aip_id, aip_type, department, title)
