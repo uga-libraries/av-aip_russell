@@ -33,6 +33,16 @@ import sys
 from variables import *
 
 
+def log(aip, message):
+    """Saves the aip and a message (the error or that processing completed) to the log file, which is a CSV saved in
+    the AIPs directory. This is a function, even though it is only a few lines, because it is used in multiple places
+    in the script. """
+
+    with open('log.csv', 'a', newline='') as log_file:
+        log_writer = csv.writer(log_file)
+        log_writer.writerow([aip, message])
+
+
 def move_error(error_name, item):
     """Move the AIP folder to an error folder, named with the error, so the rest of the workflow steps are not run on
     the AIP. Also adds the AIP and the error to a log for easier staff review."""
@@ -43,10 +53,7 @@ def move_error(error_name, item):
     os.replace(item, f'errors/{error_name}/{item}')
 
     # Adds the error to a CSV in the AIPs directory.
-    # TODO: add a header row if the file is currently empty.
-    with open('log.csv', 'a', newline='') as log_file:
-        log_writer = csv.writer(log_file)
-        log_writer.writerow([item, error_name])
+    log(item, error_name)
 
 
 def aip_directory(aip):
@@ -199,13 +206,16 @@ for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
     if not os.path.exists(directory):
         os.mkdir(directory)
 
+# Makes a log file, with a header row, in the AIPs directory.
+log("AIP", "Status")
+
 # For one AIP at a time, runs the scripts for all of the workflow steps. If a known error occurs, the AIP is moved to
 # a folder with the error name and the rest of the steps are not completed for that AIP. Checks if the AIP is still
 # present before running each script in case it was moved due to an error in the previous script.
 for aip_folder in os.listdir(aips_directory):
 
     # Skips folders for script outputs.
-    if aip_folder in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
+    if aip_folder in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest', 'log.csv']:
         continue
 
     # Updates the current AIP number and displays the script progress.
@@ -280,9 +290,7 @@ for aip_folder in os.listdir(aips_directory):
         package(aip_id, aip_type)
 
     # Adds the AIP to the log for successfully completing.
-    with open('log.csv', 'a', newline='') as log_file:
-        log_writer = csv.writer(log_file)
-        log_writer.writerow([aip_id, "Complete"])
+    log(aip_id, "Complete")
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5deep.
 # The manifest is named current-date_department_manifest.txt and saved in the aips-to-ingest folder.
