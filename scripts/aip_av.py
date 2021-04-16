@@ -77,6 +77,7 @@ def aip_metadata(aip_folder_name):
     # For Russell, the AIP folder is the AIP ID and the title is None.
     if department == "hargrett":
         try:
+            # todo: title can have underscores so need to use regex
             aip_id, title = aip_folder.split("_")
         except ValueError:
             raise ValueError
@@ -86,6 +87,22 @@ def aip_metadata(aip_folder_name):
         title = None
 
     return department, aip_id, title
+
+
+def delete_files(aip):
+    """Deletes unwanted files based on their file extension and raises an error if no files are left."""
+
+    # Deletes files if the file extension is not in the keep list.
+    # Using a lowercase version of filename so the match isn't case sensitive.
+    keep = ['.dv', '.m4a', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
+    for root, directories, files in os.walk(aip):
+        for file in files:
+            if not (any(file.lower().endswith(s) for s in keep)):
+                os.remove(f'{root}/{file}')
+
+    # If deleting the unwanted files left the AIP folder empty, raises an error.
+    if len(os.listdir(aip)) == 0:
+        raise ValueError
 
 
 def aip_directory(aip):
@@ -262,42 +279,24 @@ for aip_folder in os.listdir(aips_directory):
         move_error('aip_folder_name', aip_folder)
         continue
 
-    # For Hargrett, gets the AIP ID and title from the AIP folder name and renames the folder to the AIP ID only.
-    # If the AIP folder cannot be parsed, moves the AIP to an error folder and starts processing the next AIP.
-    if department == "hargrett":
-        try:
-            aip_id, title = aip_folder.split("_")
-        except ValueError:
-            move_error('hargrett_folder_name', aip_folder)
-            continue
-        os.replace(aip_folder, aip_id)
-    # For Russell, set a variable aip equal to the AIP ID, which is just the AIP folder, to keep variable names
-    # consistent for the rest of the script for Hargrett and Russell.
-    else:
-        aip_id = aip_folder
-
     # Deletes files if the file extension is not in the keep list.
-    # Using a lowercase version of filename so the match isn't case sensitive.
-    keep = ['.dv', '.m4a', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
-    for root, directories, files in os.walk(aip_id):
-        for file in files:
-            if not (any(file.lower().endswith(s) for s in keep)):
-                os.remove(f'{root}/{file}')
-
-    # If deleting the unwanted files left the AIP folder empty,
-    # moves the AIP to an error folder and starts processing the next AIP.
-    if len(os.listdir(aip_id)) == 0:
-        move_error('all_files_deleted', aip_id)
-        continue
+    # If all files are deleted, moves the AIP to an error folder and starts processing the next AIP.
+    if aip_id in os.listdir('.'):
+        try:
+            delete_files(aip_id)
+        except ValueError:
+            move_error('all_files_deleted', aip_id)
+            continue
 
     # Determines the AIP type (metadata or media) based on the file extensions of the digital objects.
     # Using a lowercase version of filename so the match isn't case sensitive.
     # The AIP type is part of the AIP name, along with the AIP ID.
-    for file in os.listdir(aip_id):
-        if file.lower().endswith('.pdf') or file.lower().endswith('.xml'):
-            aip_type = 'metadata'
-        else:
-            aip_type = 'media'
+    if aip_id in os.listdir('.'):
+        for file in os.listdir(aip_id):
+            if file.lower().endswith('.pdf') or file.lower().endswith('.xml'):
+                aip_type = 'metadata'
+            else:
+                aip_type = 'media'
 
     # Organizes the AIP contents into the AIP directory structure.
     if aip_id in os.listdir('.'):
