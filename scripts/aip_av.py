@@ -30,6 +30,7 @@ The script also generates a log of the AIPs processed and their final status, ei
 import csv
 import datetime
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -78,8 +79,9 @@ def aip_metadata(aip_folder_name):
     # For Russell, the AIP folder is the AIP ID and the title is None.
     if department == "hargrett":
         try:
-            # todo: title can have underscores so need to use regex
-            aip_id, title = aip_folder.split("_")
+            regex = re.match('^(harg-(ms|ua)([0-9]{{2}}-)?[0-9]{{4}}(er)[0-9]{{4}})_(.*)', aip_folder_name)
+            aip_id = regex.group()
+            title = regex.group()
         except ValueError:
             move_error("aip_folder_name", aip_folder_name)
             raise ValueError
