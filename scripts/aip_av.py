@@ -1,25 +1,28 @@
-﻿# TODO: Update description of the script based on April 2021 changes.
-"""Purpose: Creates AIPs from folders of digital audiovisual objects that are ready for ingest into the digital
-preservation system (ARCHive).
+﻿"""Purpose: Creates AIPs from folders of digital audiovisual objects that are ready for ingest into the digital
+preservation system (ARCHive). Works for all Russell audiovisual objects and Hargrett oral history collections.
 
 Dependencies: bagit.py, md5deep, mediainfo, saxon, xmllint
 
 Prior to running the script:
 
-    1. The contents of each AIP should be in a folder named with the AIP ID.
+    1. The contents of each AIP should be in a folder named with the AIP ID (Russell) or AIP-ID_Title (Hargrett).
+            Each AIP folder should contain all media or all metadata files.
     2. All AIP folders should be in a single folder (AIPs directory).
 
 Script steps:
 
-    1. Verifies the script arguments are correct.
+    1. Verifies the script argument (AIPs directory) is correct.
     2. Makes folders for script outputs within the AIPs directory.
-    3. Deletes unwanted file types.
-    4. Determines if the AIP contains media or metadata files.
-    5. Organizes the AIP contents into the AIP directory structure.
-    6. Extracts technical metadata using MediaInfo.
-    7. Converts technical metadata to PREMIS (preservation.xml) using stylesheets.
-    8. Packages the AIPs: bag, tar, and zip.
-    9. Makes a md5 manifest of all packaged AIPs.
+    3. Determines the department, and for Hargrett the title, from the AIP folder.
+    4. Deletes unwanted file types.
+    5. Determines if the AIP contains media or metadata files.
+    6. Organizes the AIP contents into the AIP directory structure.
+    7. Extracts technical metadata using MediaInfo.
+    8. Converts technical metadata to PREMIS (preservation.xml) using a stylesheet.
+    9. Packages the AIPs: bag, tar, and zip.
+   10. Makes a md5 manifest of all packaged AIPs.
+
+The script also generates a log of the AIPs processed and their final status, either an anticipated error or "complete".
 """
 
 # Script usage: python3 '/path/aip_av.py' '/path/aips-directory'
@@ -54,6 +57,35 @@ def move_error(error_name, item):
 
     # Adds the error to a CSV in the AIPs directory.
     log(item, error_name)
+
+
+def aip_metadata(aip_folder_name):
+    """Returns the department, AIP ID, and title based on the AIP folder name.
+    If any value cannot be determined, raises an error."""
+
+    # Determines the department based on the start of the AIP folder name.
+    # If it does not start with an expected value, raises an error so processing can stop on this AIP.
+    if aip_folder_name.startswith('harg'):
+        department = 'hargrett'
+    elif aip_folder_name.startswith('rbrl'):
+        department = 'russell'
+    else:
+        raise ValueError
+
+    # For Hargrett, gets the AIP ID and title from the AIP folder name and renames the folder to the AIP ID only.
+    # If the AIP folder cannot be parsed, moves the AIP to an error folder and starts processing the next AIP.
+    # For Russell, the AIP folder is the AIP ID and the title is None.
+    if department == "hargrett":
+        try:
+            aip_id, title = aip_folder.split("_")
+        except ValueError:
+            raise ValueError
+        os.replace(aip_folder, aip_id)
+    else:
+        aip_id = aip_folder_name
+        title = None
+
+    return department, aip_id, title
 
 
 def aip_directory(aip):
@@ -222,14 +254,12 @@ for aip_folder in os.listdir(aips_directory):
     current_aip += 1
     print(f'\n>>>Processing {aip_folder} ({current_aip} of {total_aips}).')
 
-    # Determines the department based on the start of the AIP folder name.
-    # If it does not start with an expected value, moves the AIP to an error folder and starts processing the next AIP.
-    if aip_folder.startswith('harg'):
-        department = 'hargrett'
-    elif aip_folder.startswith('rbrl'):
-        department = 'russell'
-    else:
-        move_error('department_unknown', aip_folder)
+    # Determines the department, AIP ID, and for Hargrett the title, from the AIP folder name.
+    # If either value cannot be calculated, moves the AIP to an error folder and starts processing the next AIP.
+    try:
+        department, aip_id, title = aip_metadata(aip_folder)
+    except ValueError:
+        move_error('aip_folder_name', aip_folder)
         continue
 
     # For Hargrett, gets the AIP ID and title from the AIP folder name and renames the folder to the AIP ID only.
