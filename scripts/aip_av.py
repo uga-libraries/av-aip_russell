@@ -288,17 +288,18 @@ for aip_folder in os.listdir(aips_directory):
     if aip_id in os.listdir('.'):
         delete_files(aip_id)
 
-    # Determines the AIP type (metadata or media) based on the file extensions of the digital objects.
-    # Known issue: for this to work, the folder must only contain metadata or media files, not both.
+    # Determines the AIP type (metadata or media) based on the file extension of the first digital object.
+    # KNOWN ISSUE: assumes the folder only contains metadata or media files, not both.
     # Using a lowercase version of filename so the match isn't case sensitive.
     # The AIP type is part of the AIP name, along with the AIP ID.
-    # TODO: break out of for loop after tests the first file so don't spend time testing the rest?
     if aip_id in os.listdir('.'):
         for file in os.listdir(aip_id):
             if file.lower().endswith('.pdf') or file.lower().endswith('.xml'):
                 aip_type = 'metadata'
+                break
             else:
                 aip_type = 'media'
+                break
 
     # Organizes the AIP folder contents into the AIP directory structure.
     if aip_id in os.listdir('.'):
