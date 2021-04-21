@@ -174,8 +174,8 @@ def preservation_xml(aip, aip_type, department, aip_title=None):
         subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{mediaxml}" -xsl:"{xslt}" -o:"{presxml}" {args}',
                        shell=True)
     else:
-        # TODO: not actually quiting the function
         move_error('no_mediainfo_xml', aip)
+        return
 
     # Validates the preservation.xml against the requirements of the Libraries' digital preservation system (ARCHive).
     # Possible validation errors:
