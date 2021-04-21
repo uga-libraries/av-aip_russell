@@ -333,12 +333,11 @@ for aip_folder in os.listdir(aips_directory):
 # Checks that aips-to-ingest is not empty (due to errors) before making the manifest.
 os.chdir('aips-to-ingest')
 current_date = datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
-# TODO: both manifests have all the files. Need to change * to include the pattern too.
 if not len(os.listdir()) == 0:
     if any(file.startswith('har') for file in os.listdir('.')):
-        subprocess.run(f'md5deep -b * > {current_date}_hargrett_manifest.txt', shell=True)
+        subprocess.run(f'md5deep -b har* > {current_date}_hargrett_manifest.txt', shell=True)
     if any(file.startswith('rbrl') for file in os.listdir('.')):
-        subprocess.run(f'md5deep -b * > {current_date}_russell_manifest.txt', shell=True)
+        subprocess.run(f'md5deep -b rbrl* > {current_date}_russell_manifest.txt', shell=True)
 else:
     print('Could not make manifest. aips-to-ingest is empty.')
 
