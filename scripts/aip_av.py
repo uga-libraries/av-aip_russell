@@ -77,12 +77,13 @@ def aip_metadata(aip_folder_name):
     # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
     if department == "hargrett":
         try:
-            regex = re.match('(har-ua[0-9]{{2}}-[0-9]{{3}}_[0-9]{{4}})_(.*)', aip_folder_name)
+            regex = re.match('(har-ua[0-9]{2}-[0-9]{3}_[0-9]{4})_(.*)', aip_folder_name)
             aip_id = regex.group(1)
-            title = regex.group(5)
+            title = regex.group(2)
         except ValueError:
             move_error("aip_folder_name", aip_folder_name)
-            raise ValueError
+            raise
+        #TODO: this is going to cause an error with 2 folders of the same name if media and metadata both are included.
         os.replace(aip_folder, aip_id)
     # For Russell, the AIP folder is the AIP ID. The AIP title is made later by combining the AIP ID and type.
     else:
@@ -251,6 +252,7 @@ except (FileNotFoundError, NotADirectoryError):
     exit()
 
 # Starts counts for tracking the script progress.
+# TODO: the total count is off if a .ds_store or any other file is in the aips_directory.
 total_aips = len(os.listdir(aips_directory))
 current_aip = 0
 
@@ -319,6 +321,8 @@ for aip_folder in os.listdir(aips_directory):
         package(aip_id, aip_type)
 
     # Adds the AIP to the log for successfully completing.
+    # TODO: this is logging any AIP that is started. Need to test it is in aips-to-ingest to know it completed.
+    #  Do at the end of package()?
     log(aip_id, "Complete")
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5deep.
