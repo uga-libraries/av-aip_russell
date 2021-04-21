@@ -3,7 +3,6 @@
 
 import bagit
 import os
-import re
 import sys
 
 # Gets the path to the bag for the batch from the script argument.
@@ -32,13 +31,16 @@ except bagit.BagValidationError as e:
     print("Bag is not valid")
     print(e)
 
-# Removes the batch of AIP folders from the bag by deleting the bag metadata files (text files), moving the contents
-# of the data folder into the parent directory, and deleting the now-empty data folder.
+# The rest of the script removes the batch of AIP folders from the bag.
+
+# Deletes the bag metadata files, which are all text files.
 for doc in os.listdir('.'):
     if doc.endswith('.txt'):
         os.remove(doc)
 
+# Moves the contents of the data folder (the AIP folders) into the parent directory.
 for item in os.listdir('data'):
     os.replace(f'data/{item}', item)
 
+# Deleting the now-empty data folder.
 os.rmdir('data')
