@@ -5,7 +5,7 @@ Dependencies: bagit.py, md5deep, mediainfo, saxon, xmllint
 
 Prior to running the script:
 
-    1. The contents of each AIP should be in a folder named with the AIP ID (Russell) or AIP-ID_Title (Hargrett).
+    1. The contents of each AIP should be in a folder named with the AIP ID (Russell) or AIP ID_Title (Hargrett).
             Each AIP folder should contain all media or all metadata files.
     2. All AIP folders should be in a single folder (AIPs directory).
 
@@ -13,7 +13,7 @@ Script steps:
 
     1. Verifies the script argument (AIPs directory) is correct.
     2. Makes folders for script outputs within the AIPs directory.
-    3. Determines the department, and for Hargrett the title, from the AIP folder.
+    3. Determines the department, AIP ID, and for Hargrett the title, from the AIP folder.
     4. Deletes unwanted file types.
     5. Determines if the AIP contains media or metadata files.
     6. Organizes the AIP contents into the AIP directory structure.
