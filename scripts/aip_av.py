@@ -164,7 +164,7 @@ def preservation_xml(aip, aip_type, department, aip_title=None):
     # Arguments to add to the saxon command. Always has type and department; only Hargrett has title.
     args = f'type={aip_type} department={department}'
     if aip_title:
-        args += f' title={aip_title}'
+        args += f' title="{aip_title}"'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
