@@ -65,7 +65,7 @@ def aip_metadata(aip_folder_name):
 
     # Determines the department based on the start of the AIP folder name.
     # If it does not start with an expected value, raises an error so processing can stop on this AIP.
-    if aip_folder_name.startswith('harg'):
+    if aip_folder_name.startswith('har'):
         department = 'hargrett'
     elif aip_folder_name.startswith('rbrl'):
         department = 'russell'
@@ -325,7 +325,7 @@ for aip_folder in os.listdir(aips_directory):
 os.chdir('aips-to-ingest')
 current_date = datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
 if not len(os.listdir()) == 0:
-    if any(file.startswith('harg') for file in os.listdir('.')):
+    if any(file.startswith('har') for file in os.listdir('.')):
         subprocess.run(f'md5deep -b * > {current_date}_hargrett_manifest.txt', shell=True)
     if any(file.startswith('rbrl') for file in os.listdir('.')):
         subprocess.run(f'md5deep -b * > {current_date}_russell_manifest.txt', shell=True)
