@@ -77,7 +77,7 @@ def aip_metadata(aip_folder_name):
     # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
     if department == "hargrett":
         try:
-            regex = re.match('^(harg-(ms|ua)([0-9]{{2}}-)?[0-9]{{4}}(er)[0-9]{{4}})_(.*)', aip_folder_name)
+            regex = re.match('(har-ua[0-9]{{2}}-[0-9]{{3}}_[0-9]{{4}})_(.*)', aip_folder_name)
             aip_id = regex.group(1)
             title = regex.group(5)
         except ValueError:

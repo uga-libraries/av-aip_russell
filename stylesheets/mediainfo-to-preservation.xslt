@@ -56,7 +56,7 @@
     <xsl:variable name="aip-id">
 		<!-- Hargrett identifier format: harg-, ms or ua, optional 2 numbers followed by a dash, 4 numbers, er, 4 numbers.-->
 		<xsl:if test="$department='hargrett'">
-			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="(harg-(ms|ua)(\d{{2}}-)?\d{{4}}er\d{{4}})/objects">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="(har-ua[0-9]{{2}}-[0-9]{{3}}_[0-9]{{4}})/objects">
 			 	<xsl:matching-substring>
 		 		    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
 		 		</xsl:matching-substring>
@@ -77,7 +77,7 @@
     <xsl:variable name="collection-id">
 		<!-- Hargrett identifier format: harg-, ms or ua, optional 2 numbers followed by a dash, 4 numbers.-->
 		<xsl:if test="$department='hargrett'">
-			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(harg-(ms|ua)?(\d{{2}}-)?\d{{4}})">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}})">
 				<xsl:matching-substring>
                 	<xsl:value-of select="regex-group(1)"/>
             	</xsl:matching-substring>
