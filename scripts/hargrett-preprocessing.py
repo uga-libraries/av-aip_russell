@@ -11,17 +11,17 @@ try:
     bag_path = sys.argv[1]
 except IndexError:
     print("The bag path, which is required, is missing.")
-    print("To run the script: python3 /path/hargret-preprocessing.py /path/bag")
+    print("To run the script: python3 /path/hargrett-preprocessing.py /path/bag")
 
-# Changes the current directory to the bag.
+# Changes the current directory to the bag directory.
 # If the bag path is not a valid path, prints an error message and quits the script.
 try:
     os.chdir(bag_path)
 except (FileNotFoundError, NotADirectoryError):
-    print("The bag path is not valid path.")
+    print("The provided bag path is not valid path.")
     print("To run the script: python3 /path/hargrett-preprocessing.py /path/bag")
 
-# Validate the bag and print the validation results.
+# Validates the bag and prints the validation results.
 # If the bag is not valid, quits the script.
 # TODO: switch to using bagit.py.
 try:
@@ -31,9 +31,11 @@ except bagit.BagValidationError as e:
     print("Bag is not valid")
     print(e)
 
-# The rest of the script removes the batch of AIP folders from the bag.
+# The rest of the script removes the batch of AIP folders from the transfer bag.
+# The end result is a folder (AIPs directory) which contains all the folders to be made into AIPs.
 
-# Deletes the bag metadata files, which are all text files.
+# Deletes the bag metadata files, which are all text files directly within the bag.
+# After these are deleted, the only thing left is the data folder which contains the AIP folders.
 for doc in os.listdir('.'):
     if doc.endswith('.txt'):
         os.remove(doc)
@@ -42,5 +44,5 @@ for doc in os.listdir('.'):
 for item in os.listdir('data'):
     os.replace(f'data/{item}', item)
 
-# Deleting the now-empty data folder.
+# Deletes the now-empty data folder.
 os.rmdir('data')
