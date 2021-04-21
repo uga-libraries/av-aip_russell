@@ -18,7 +18,7 @@
 	
 	<xsl:template match="/">
 		<preservation>
-			<xsl:call-template name="title"/>
+			<dc:title><xsl:value-of select="$title"/></dc:title>
 			<dc:rights>http://rightsstatements.org/vocab/InC/1.0/</dc:rights>
 			<aip>
 				<premis:object>
@@ -47,7 +47,7 @@
     <!-- The parameters are given as arguments when running the xslt via the command line or script.-->
     <xsl:param name="department" required="yes"/>
 	<xsl:param name="type" required="yes"/>
-	<xsl:param name="title"/>
+	<xsl:param name="title" required="yes"/>
 	
     <!-- The unique identifier for the group in the ARCHive (digital preservation system).-->
 	<xsl:variable name="uri">INSERT-ARCHive-URI/<xsl:value-of select="$department" /></xsl:variable>
@@ -171,14 +171,6 @@
 
     <!-- For aips with more than one file, this section has summary information about the aip as a whole.-->
     <!-- For aips with one file, this section has all the details about that file.-->
-
-	<!-- title: value of title parameter for Hargrett and aip id for Russell. -->
-	<xsl:template name="title">
-		<dc:title>
-			<xsl:if test="$department='hargrett'"><xsl:value-of select="$title"/></xsl:if>
-			<xsl:if test="$department='russell'"><xsl:value-of select="$aip-id"/></xsl:if>
-		</dc:title>
-	</xsl:template>
 
 	<!-- aip id: PREMIS 1.1 (required): type is group uri and value is aip id. -->
 	<xsl:template name="aip-id">

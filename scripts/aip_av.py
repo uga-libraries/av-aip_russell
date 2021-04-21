@@ -156,17 +156,17 @@ def mediainfo(aip, aip_type):
 
 def preservation_xml(aip, aip_type, department, aip_title=None):
     """Creates PREMIS and Dublin Core metadata from the MediaInfo XML and saves it as a preservation.xml file."""
-    # TODO: assign aip-id_type to variable title for Russell so that both departments use title parameter. Simpler code.
 
     # Paths to files used in the saxon command.
     mediaxml = f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml'
     xslt = f'{stylesheets}/mediainfo-to-preservation.xslt'
     presxml = f'{aip}/metadata/{aip}_{aip_type}_preservation.xml'
 
-    # Arguments to add to the saxon command. Always has type and department; only Hargrett has title.
-    args = f'type={aip_type} department={department}'
-    if aip_title:
-        args += f' title="{aip_title}"'
+    # Arguments to add to the saxon command.
+    # Hargrett title was calculated from the AIP folder. Russell title is calculated from the AIP ID and type.
+    if not aip_title:
+        aip_title = f'{aip}_{aip_type}'
+    args = f'type={aip_type} department={department} title="{aip_title}'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
