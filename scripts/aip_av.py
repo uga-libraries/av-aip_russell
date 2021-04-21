@@ -113,7 +113,7 @@ def aip_directory(aip):
     objects to the objects folder. """
 
     # Makes the objects folder within the AIP folder, if it doesn't exist. If there is already a folder named objects
-    # in the first level within the AIP folder, moves the AIP to an error folder and quits this function. Do not want
+    # in the first level within the AIP folder, moves the AIP to an error folder and ends this function. Do not want
     # to alter the original directory structure by adding to an original folder named objects.
     try:
         os.mkdir(f'{aip}/objects')
@@ -135,7 +135,7 @@ def aip_directory(aip):
 def mediainfo(aip, aip_type):
     """Extracts technical metadata from the files in the objects folder using MediaInfo."""
 
-    # Runs MediaInfo on the contents of the objects folder and saves the xml output to the metadata folder.
+    # Runs MediaInfo on the contents of the objects folder and saves the XML output to the metadata folder.
     # --'Output=XML' uses the XML structure that started with MediaInfo 18.03
     # --'Language=raw' outputs the size in bytes.
     subprocess.run(
@@ -153,6 +153,7 @@ def mediainfo(aip, aip_type):
 
 def preservation_xml(aip, aip_type, department, aip_title=None):
     """Creates PREMIS and Dublin Core metadata from the MediaInfo XML and saves it as a preservation.xml file."""
+    # TODO: assign aip-id_type to variable title for Russell so that both departments use title parameter. Simpler code.
 
     # Paths to files used in the saxon command.
     mediaxml = f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml'
@@ -165,11 +166,12 @@ def preservation_xml(aip, aip_type, department, aip_title=None):
         args += f' title={aip_title}'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
-    # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and quits this function.
+    # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
     if os.path.exists(mediaxml):
         subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{mediaxml}" -xsl:"{xslt}" -o:"{presxml}" {args}',
                        shell=True)
     else:
+        # TODO: not actually quiting the function
         move_error('no_mediainfo_xml', aip)
 
     # Validates the preservation.xml against the requirements of the Libraries' digital preservation system (ARCHive).
@@ -212,8 +214,7 @@ def package(aip, aip_type):
     os.replace(aip, bag_name)
 
     # Validates the bag. If the bag is not valid, moves the AIP to an error folder, saves the validation error to a
-    # document in the error folder, and quits this function. The validation output is converted from a byte type to a
-    # string for easier formatting. The error document is formatted so each error is its own line.
+    # document in the error folder, and ends this function.
     validate = subprocess.run(f'bagit.py --validate --quiet "{bag_name}"', stderr=subprocess.PIPE, shell=True)
 
     if 'invalid' in str(validate):
@@ -237,7 +238,7 @@ try:
     aips_directory = sys.argv[1]
 except IndexError:
     print('The AIPs directory is missing and is a required argument.')
-    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory' [department]")
+    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
     exit()
 
 # Changes the current directory to the AIPs directory.
@@ -288,6 +289,7 @@ for aip_folder in os.listdir(aips_directory):
     # Known issue: for this to work, the folder must only contain metadata or media files, not both.
     # Using a lowercase version of filename so the match isn't case sensitive.
     # The AIP type is part of the AIP name, along with the AIP ID.
+    # TODO: break out of for loop after tests the first file so don't spend time testing the rest?
     if aip_id in os.listdir('.'):
         for file in os.listdir(aip_id):
             if file.lower().endswith('.pdf') or file.lower().endswith('.xml'):
@@ -295,7 +297,7 @@ for aip_folder in os.listdir(aips_directory):
             else:
                 aip_type = 'media'
 
-    # Organizes the AIP contents into the AIP directory structure.
+    # Organizes the AIP folder contents into the AIP directory structure.
     if aip_id in os.listdir('.'):
         aip_directory(aip_id)
 
@@ -305,6 +307,7 @@ for aip_folder in os.listdir(aips_directory):
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
     # Only includes the optional title parameter for Hargrett.
+    # TODO: calculate the Russell title (id_type) and pass as title parameter to simplify code.
     if aip_id in os.listdir('.'):
         if department == 'hargrett':
             preservation_xml(aip_id, aip_type, department, title)
