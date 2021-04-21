@@ -233,6 +233,9 @@ def package(aip, aip_type):
     # The tarred and zipped AIP is saved to the aips-to-ingest folder.
     subprocess.run(f'perl "{prepare_bag}" "{bag_name}" aips-to-ingest', shell=True)
 
+    # Adds the AIP to the log for successfully completing, since this function is the last step.
+    log(aip_id, "Complete")
+
 
 # Gets the AIPs directory from the script argument.
 # The AIPs directory contains all the folders to be made into AIPs.
@@ -321,11 +324,6 @@ for aip_folder in os.listdir(aips_directory):
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_id in os.listdir('.'):
         package(aip_id, aip_type)
-
-    # Adds the AIP to the log for successfully completing.
-    # TODO: this is logging any AIP that is started. Need to test it is in aips-to-ingest to know it completed.
-    #  Do at the end of package()?
-    log(aip_id, "Complete")
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5deep.
 # The manifest is named current-date_department_manifest.txt and saved in the aips-to-ingest folder.
