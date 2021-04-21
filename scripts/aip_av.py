@@ -84,6 +84,7 @@ def aip_metadata(aip_folder_name):
             move_error("aip_folder_name", aip_folder_name)
             raise
         #TODO: this is going to cause an error with 2 folders of the same name if media and metadata both are included.
+        # Wait to rename when russell does to add _media or _metadata?
         os.replace(aip_folder, aip_id)
     # For Russell, the AIP folder is the AIP ID. The AIP title is made later by combining the AIP ID and type.
     else:
@@ -135,6 +136,7 @@ def aip_directory(aip):
 
 def mediainfo(aip, aip_type):
     """Extracts technical metadata from the files in the objects folder using MediaInfo."""
+    # KNOWN ISSUE: mediainfo can identify PDF versions but only identifies OHMS xml by the file extension.
 
     # Runs MediaInfo on the contents of the objects folder and saves the XML output to the metadata folder.
     # --'Output=XML' uses the XML structure that started with MediaInfo 18.03
@@ -252,7 +254,6 @@ except (FileNotFoundError, NotADirectoryError):
     exit()
 
 # Starts counts for tracking the script progress.
-# TODO: the total count is off if a .ds_store or any other file is in the aips_directory.
 total_aips = len(os.listdir(aips_directory))
 current_aip = 0
 
@@ -331,6 +332,7 @@ for aip_folder in os.listdir(aips_directory):
 # Checks that aips-to-ingest is not empty (due to errors) before making the manifest.
 os.chdir('aips-to-ingest')
 current_date = datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
+# TODO: both manifests have all the files. Need to change * to include the pattern too.
 if not len(os.listdir()) == 0:
     if any(file.startswith('har') for file in os.listdir('.')):
         subprocess.run(f'md5deep -b * > {current_date}_hargrett_manifest.txt', shell=True)
