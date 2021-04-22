@@ -73,7 +73,7 @@ def aip_metadata(aip_folder_name):
         move_error('department_unknown', aip_folder_name)
         raise ValueError
 
-    # For Hargrett, gets the AIP ID and title from the AIP folder name and renames the folder to the AIP ID only.
+    # For Hargrett, gets the AIP ID and title from the AIP folder name, which is formatted AIPID_Title.
     # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
     if department == "hargrett":
         try:
@@ -83,9 +83,6 @@ def aip_metadata(aip_folder_name):
         except ValueError:
             move_error("aip_folder_name", aip_folder_name)
             raise
-        #TODO: this is going to cause an error with 2 folders of the same name if media and metadata both are included.
-        # Wait to rename when russell does to add _media or _metadata?
-        os.replace(aip_folder, aip_id)
     # For Russell, the AIP folder is the AIP ID. The AIP title is made later by combining the AIP ID and type.
     else:
         aip_id = aip_folder_name
@@ -198,7 +195,7 @@ def preservation_xml(aip, aip_type, department, aip_title):
 
 
 def package(aip, aip_type):
-    """Bags, tars, and zips the AIP."""
+    """Bags, tars, and zips the AIP. Renames the AIP folder to AIPID_type_bag."""
 
     # Deletes any .DS_Store files because they cause errors with bag validation. They would have been deleted by
     # delete_files() earlier in the script, but can be regenerated while the script is running.
@@ -288,14 +285,14 @@ for aip_folder in os.listdir(aips_directory):
         continue
 
     # Deletes undesired files based on the file extension.
-    if aip_id in os.listdir('.'):
+    if aip_folder in os.listdir('.'):
         delete_files(aip_id)
 
     # Determines the AIP type (metadata or media) based on the file extension of the first digital object.
     # KNOWN ISSUE: assumes the folder only contains metadata or media files, not both.
     # Using a lowercase version of filename so the match isn't case sensitive.
     # The AIP type is part of the AIP name, along with the AIP ID.
-    if aip_id in os.listdir('.'):
+    if aip_folder in os.listdir('.'):
         for file in os.listdir(aip_id):
             if file.lower().endswith('.pdf') or file.lower().endswith('.xml'):
                 aip_type = 'metadata'
@@ -305,20 +302,20 @@ for aip_folder in os.listdir(aips_directory):
                 break
 
     # Organizes the AIP folder contents into the AIP directory structure.
-    if aip_id in os.listdir('.'):
+    if aip_folder in os.listdir('.'):
         aip_directory(aip_id)
 
     # Extracts technical metadata from the files using MediaInfo.
-    if aip_id in os.listdir('.'):
+    if aip_folder in os.listdir('.'):
         mediainfo(aip_id, aip_type)
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
     # The title passed for Russell is None and the real title is calculated in preservation_xml().
-    if aip_id in os.listdir('.'):
+    if aip_folder in os.listdir('.'):
             preservation_xml(aip_id, aip_type, department, title)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
-    if aip_id in os.listdir('.'):
+    if aip_folder in os.listdir('.'):
         package(aip_id, aip_type)
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5deep.
