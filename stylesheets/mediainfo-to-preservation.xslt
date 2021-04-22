@@ -55,7 +55,7 @@
     <xsl:variable name="aip-id">
 		<!-- Hargrett identifier format: harg-, ms or ua, optional 2 numbers followed by a dash, 4 numbers, er, 4 numbers.-->
 		<xsl:if test="$department='hargrett'">
-			<xsl:analyze-string select="/Mediainfo/File[1]/track[@type='General']/CompleteName" regex="(har-ua[0-9]{{2}}-[0-9]{{3}}_[0-9]{{4}})/objects">
+			<xsl:analyze-string select="/Mediainfo/File[1]/track[@type='General']/CompleteName" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}}_[0-9]{{4}})">
 			 	<xsl:matching-substring>
 		 		    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
 		 		</xsl:matching-substring>
