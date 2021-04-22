@@ -163,7 +163,7 @@ def preservation_xml(aip, id, aip_type, department, aip_title):
     # Hargrett title was calculated from the AIP folder. Russell title is calculated from the AIP ID and type.
     if not aip_title:
         aip_title = f'{id}_{aip_type}'
-    args = f'type={aip_type} department={department} title="{aip_title}'
+    args = f'type={aip_type} department={department} title="{aip_title}"'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
