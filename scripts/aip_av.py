@@ -162,7 +162,7 @@ def preservation_xml(aip, id, aip_type, department, aip_title):
     # Arguments to add to the saxon command.
     # Hargrett title was calculated from the AIP folder. Russell title is calculated from the AIP ID and type.
     if not aip_title:
-        aip_title = f'{aip}_{aip_type}'
+        aip_title = f'{id}_{aip_type}'
     args = f'type={aip_type} department={department} title="{aip_title}'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
@@ -186,7 +186,7 @@ def preservation_xml(aip, id, aip_type, department, aip_title):
     # staff use.
     if 'failed to load' in str(validate) or 'fails to validate' in str(validate):
         move_error('preservation_invalid', aip)
-        with open(f'errors/preservation_invalid/{aip}_preservationxml_validation_error.txt', 'a') as error:
+        with open(f'errors/preservation_invalid/{id}_preservationxml_validation_error.txt', 'a') as error:
             lines = str(validate.stderr).split('\\n')
             for line in lines:
                 error.write(f'{line}\n\n')
@@ -194,7 +194,7 @@ def preservation_xml(aip, id, aip_type, department, aip_title):
         shutil.copy2(presxml, 'preservation-xml')
 
 
-def package(aip, aip_type):
+def package(aip, id, aip_type):
     """Bags, tars, and zips the AIP. Renames the AIP folder to AIPID_type_bag."""
 
     # Deletes any .DS_Store files because they cause errors with bag validation. They would have been deleted by
@@ -210,7 +210,7 @@ def package(aip, aip_type):
 
     # Renames the AIP folder to add the AIP type and '_bag' to the end.
     # This is saved to a variable first since it is used a few more times in the function.
-    bag_name = f'{aip}_{aip_type}_bag'
+    bag_name = f'{id}_{aip_type}_bag'
     os.replace(aip, bag_name)
 
     # Validates the bag. If the bag is not valid, moves the AIP to an error folder, saves the validation error to a
@@ -219,7 +219,7 @@ def package(aip, aip_type):
 
     if 'invalid' in str(validate):
         move_error('bag_invalid', bag_name)
-        with open(f'errors/bag_invalid/{aip}_bag_validation_error.txt', 'a') as error:
+        with open(f'errors/bag_invalid/{id}_bag_validation_error.txt', 'a') as error:
             lines = str(validate.stderr).split(';')
             for line in lines:
                 error.write(f'{line}\n\n')
@@ -231,7 +231,7 @@ def package(aip, aip_type):
     subprocess.run(f'perl "{prepare_bag}" "{bag_name}" aips-to-ingest', shell=True)
 
     # Adds the AIP to the log for successfully completing, since this function is the last step.
-    log(aip_id, "Complete")
+    log(aip_folder, "Complete")
 
 
 # Gets the AIPs directory from the script argument.
@@ -263,7 +263,7 @@ for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
         os.mkdir(directory)
 
 # Makes a log file, with a header row, in the AIPs directory.
-log("AIP", "Status")
+log("AIP Folder", "Status")
 
 # For one AIP at a time, runs the functions for all of the workflow steps. If a known error occurs, the AIP is moved to
 # a folder with the error name and the rest of the steps are not completed for that AIP. Checks if the AIP is still
@@ -316,7 +316,7 @@ for aip_folder in os.listdir(aips_directory):
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_folder in os.listdir('.'):
-        package(aip_id, aip_type)
+        package(aip_folder, aip_id, aip_type)
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5deep.
 # The manifest is named current-date_department_manifest.txt and saved in the aips-to-ingest folder.
