@@ -131,7 +131,7 @@ def aip_directory(aip):
     os.mkdir(f'{aip}/metadata')
 
 
-def mediainfo(aip, aip_type):
+def mediainfo(aip, id, aip_type):
     """Extracts technical metadata from the files in the objects folder using MediaInfo."""
     # KNOWN ISSUE: mediainfo can identify PDF versions but only identifies OHMS xml by the file extension.
 
@@ -139,25 +139,25 @@ def mediainfo(aip, aip_type):
     # --'Output=XML' uses the XML structure that started with MediaInfo 18.03
     # --'Language=raw' outputs the size in bytes.
     subprocess.run(
-        f'mediainfo -f --Output=XML --Language=raw "{aip}/objects" > "{aip}/metadata/{aip}_{aip_type}_mediainfo.xml"',
+        f'mediainfo -f --Output=XML --Language=raw "{aip}/objects" > "{aip}/metadata/{id}_{aip_type}_mediainfo.xml"',
         shell=True)
 
     # Copies the MediaInfo XML to a separate folder (mediainfo-xml) for staff reference.
     # If a file by that name is already in mediainfo-xml,
     #   moves the AIP to an error folder instead since the AIP may be a duplicate.
-    if os.path.exists(f'mediainfo-xml/{aip}_{aip_type}_mediainfo.xml'):
+    if os.path.exists(f'mediainfo-xml/{id}_{aip_type}_mediainfo.xml'):
         move_error('preexisting_mediainfo_copy', aip)
     else:
-        shutil.copy2(f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml', 'mediainfo-xml')
+        shutil.copy2(f'{aip}/metadata/{id}_{aip_type}_mediainfo.xml', 'mediainfo-xml')
 
 
-def preservation_xml(aip, aip_type, department, aip_title):
+def preservation_xml(aip, id, aip_type, department, aip_title):
     """Creates PREMIS and Dublin Core metadata from the MediaInfo XML and saves it as a preservation.xml file."""
 
     # Paths to files used in the saxon command.
-    mediaxml = f'{aip}/metadata/{aip}_{aip_type}_mediainfo.xml'
+    mediaxml = f'{aip}/metadata/{id}_{aip_type}_mediainfo.xml'
     xslt = f'{stylesheets}/mediainfo-to-preservation.xslt'
-    presxml = f'{aip}/metadata/{aip}_{aip_type}_preservation.xml'
+    presxml = f'{aip}/metadata/{id}_{aip_type}_preservation.xml'
 
     # Arguments to add to the saxon command.
     # Hargrett title was calculated from the AIP folder. Russell title is calculated from the AIP ID and type.
@@ -286,14 +286,14 @@ for aip_folder in os.listdir(aips_directory):
 
     # Deletes undesired files based on the file extension.
     if aip_folder in os.listdir('.'):
-        delete_files(aip_id)
+        delete_files(aip_folder)
 
     # Determines the AIP type (metadata or media) based on the file extension of the first digital object.
     # KNOWN ISSUE: assumes the folder only contains metadata or media files, not both.
     # Using a lowercase version of filename so the match isn't case sensitive.
     # The AIP type is part of the AIP name, along with the AIP ID.
     if aip_folder in os.listdir('.'):
-        for file in os.listdir(aip_id):
+        for file in os.listdir(aip_folder):
             if file.lower().endswith('.pdf') or file.lower().endswith('.xml'):
                 aip_type = 'metadata'
                 break
@@ -303,16 +303,16 @@ for aip_folder in os.listdir(aips_directory):
 
     # Organizes the AIP folder contents into the AIP directory structure.
     if aip_folder in os.listdir('.'):
-        aip_directory(aip_id)
+        aip_directory(aip_folder)
 
     # Extracts technical metadata from the files using MediaInfo.
     if aip_folder in os.listdir('.'):
-        mediainfo(aip_id, aip_type)
+        mediainfo(aip_folder, aip_id, aip_type)
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
     # The title passed for Russell is None and the real title is calculated in preservation_xml().
     if aip_folder in os.listdir('.'):
-            preservation_xml(aip_id, aip_type, department, title)
+        preservation_xml(aip_folder, aip_id, aip_type, department, title)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_folder in os.listdir('.'):
