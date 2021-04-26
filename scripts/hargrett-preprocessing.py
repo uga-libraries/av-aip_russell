@@ -12,6 +12,7 @@ try:
 except IndexError:
     print("The bag path, which is required, is missing.")
     print("To run the script: python3 /path/hargrett-preprocessing.py /path/bag")
+    exit()
 
 # Changes the current directory to the bag directory.
 # If the bag path is not a valid path, prints an error message and quits the script.
@@ -20,6 +21,7 @@ try:
 except (FileNotFoundError, NotADirectoryError):
     print("The provided bag path is not valid path.")
     print("To run the script: python3 /path/hargrett-preprocessing.py /path/bag")
+    exit()
 
 # Validates the bag and prints the validation results.
 # If the bag is not valid, quits the script.
@@ -30,6 +32,7 @@ try:
 except bagit.BagValidationError as e:
     print("Bag is not valid")
     print(e)
+    exit()
 
 # The rest of the script removes the batch of AIP folders from the transfer bag.
 # The end result is a folder (AIPs directory) which contains all the folders to be made into AIPs.
