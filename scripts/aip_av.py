@@ -240,7 +240,7 @@ def package(aip, id, aip_type):
 try:
     aips_directory = sys.argv[1]
 except IndexError:
-    print('The AIPs directory is missing and is a required argument.')
+    print('\nThe AIPs directory is missing and is a required argument.')
     print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
     exit()
 
@@ -249,7 +249,7 @@ except IndexError:
 try:
     os.chdir(aips_directory)
 except (FileNotFoundError, NotADirectoryError):
-    print(f'The AIPs directory "{aips_directory}" is not a valid directory.')
+    print(f'\nThe provided AIPs directory "{aips_directory}" is not a valid directory.')
     print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
     exit()
 
@@ -330,6 +330,6 @@ if not len(os.listdir()) == 0:
     if any(file.startswith('rbrl') for file in os.listdir('.')):
         subprocess.run(f'md5deep -b rbrl* > {current_date}_russell_manifest.txt', shell=True)
 else:
-    print('Could not make manifest. aips-to-ingest is empty.')
+    print('\nCould not make manifest. aips-to-ingest is empty.')
 
 print('\nScript is finished running.')
