@@ -186,7 +186,7 @@ def preservation_xml(aip, id, aip_type, department, aip_title):
     # staff use.
     if 'failed to load' in str(validate) or 'fails to validate' in str(validate):
         move_error('preservation_invalid', aip)
-        with open(f'errors/preservation_invalid/{id}_preservationxml_validation_error.txt', 'a') as error:
+        with open(f'errors/preservation_invalid/{id}_{aip_type}_preservationxml_validation_error.txt', 'a') as error:
             lines = str(validate.stderr).split('\\n')
             for line in lines:
                 error.write(f'{line}\n\n')
