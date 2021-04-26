@@ -5,7 +5,7 @@ Use the following instructions for thoroughly testing the aip_av.py script after
 ## Testing Valid AIPs
 
 ###AIPs to include in the test suite
-For each scenario, make one metadata and one media AIP. At least one media and metadata AIP should have the same base AIP ID, e.g., har-ua20-123_0001_media and harg-ua20-123_0001_metadata.
+For each scenario, make one media and one metadata AIP. At least one media and metadata AIP should have the same base AIP ID, e.g., har-ua20-123_0001_media and harg-ua20-123_0001_metadata.
 
 * An AIP with one file in an accepted format.
 * An AIP with at least one file, and sometimes multiple files, in each of the accepted formats.
@@ -18,8 +18,9 @@ For each scenario, make one metadata and one media AIP. At least one media and m
 * The media or metadata suffix was added correctly to each AIP.
 * A mediainfo.xml file was made for each AIP and has reasonable format identification information.  
 * A valid preservation.xml file was made for each AIP and has the expected information.
-* A valid bag with MD5 and SHA256 manifests was made for each AIP, and it is tarred and zipped.
-* The manifest in aips-to-ingest includes all the AIPs.
+* A valid bag with MD5 and SHA256 manifests was made for each AIP.
+* The final version of the AIP in the aips-to-ingest folder is tarred and zipped, and includes the file size as part of the file name.
+* The manifest in the aips-to-ingest folder includes all the AIPs.
 * The log includes all AIPs, with a status of "Complete".
 
 ## Testing Error Handling
@@ -27,7 +28,7 @@ For each scenario, make one metadata and one media AIP. At least one media and m
 ### AIPs to include in the test suite
 
 1. An AIP with an AIP ID that does not start with one of the expected department prefixes.
-2. An AIP with an AIP ID that has an expected department prefix but does not match any of the expected patterns.
+2. An AIP with an AIP ID that has an expected department prefix but does not match any of the expected ID patterns for that department.
 3. A Hargrett AIP without an underscore between the AIP ID and title in the AIP folder name.
 4. An AIP that only contains files in unaccepted formats.
 5. An AIP with a folder named "objects" within the AIP folder.
@@ -36,7 +37,7 @@ For each scenario, make one metadata and one media AIP. At least one media and m
 
 ### Things to check for
 
-The following script argument errors should cause an error message to display in the terminal and the script to quit.
+Make the following errors with the script argument. Each should cause an error message to display in the terminal and the script to quit.
 * Do not include the AIPs directory.
 * Include an AIPs directory that is not a valid path.
 * Include an AIPs directory that is a file instead of a folder.
@@ -48,23 +49,23 @@ Run the script on AIPs 1-5, which should result in the following:
 * AIP 5 is in an error folder named "preexisting_objects_folder".
 * Other than AIP 4, the contents of the AIP folders are unchanged.  
 * The aips-to-ingest, mediainfo-xml, and preservation-xml folders are empty.
-* The error "Could not make manifest. aips-to-ingest is empty." is displayed the terminal.
-* All AIPs should be in the log with a status matching the error folder name.
+* The error "Could not make manifest. aips-to-ingest is empty." is displayed in the terminal.
+* All AIPs are in the log with a status matching the error folder name.
 
 Use AIPs 6-7 for the remaining tests, which require editing the code to force errors to occur. Run the tests one at a time, undoing the change to the code required for one test before making the change for the next test. When testing is complete, run the script on a valid AIP folder to confirm that all changes for the tests have removed correctly from the script.
 
 In each scenario, verify the log has the correct status for the AIPs and that no manifest is made in addition to verifying the expected results detailed in each test description.
 
-* Save a copy of both mediainfo.xml files to the mediainfo-xml folder prior to running the script. The AIPs should be in an error folder named "preexisting_mediainfo_copy". They will have a mediainfo.xml file, but not a preservation.xml file, in the AIP metadata folder. The mediainfo.xml files in the mediainfo-xml folder should not be overwritten.
+* Save a copy of the mediainfo.xml files for both AIPs to the mediainfo-xml folder prior to running the script. The AIPs should be in an error folder named "preexisting_mediainfo_copy". They will have a mediainfo.xml file, but not a preservation.xml file, in the AIP metadata folder. The mediainfo.xml files that were in the mediainfo-xml folder should not be overwritten.
 
 
-* Comment out the following code in the aip_av.py script, which is towards the end of the script, so it does not run. The AIPs should be in an error folder named "no_mediainfo_xml". There will be no mediainfo.xml or preservation.xml files made.
+* Comment out the following code in the aip_av.py script, which is towards the end of the script, so it does not run. The AIPs should be in an error folder named "no_mediainfo_xml". No mediainfo.xml or preservation.xml files will be made.
     ```
     # Extracts technical metadata from the files using MediaInfo.
     if aip_folder in os.listdir('.'):
         mediainfo(aip_folder, aip_id, aip_type)
 
-* Replace the first template in the mediainfo-to-preservation.xslt file with the following code to create invalid preservation.xml. The AIPs should be in an error folder named "preservation_invalid". There should also be a text file for each AIP in the error folder with the error messages from validating, which include that the values for title and rights are not valid and that the element <error> is not expected. The AIP metadata folders will contain the mediainfo.xml and preservation.xml files. The mediainfo-xml folder will contain the mediainfo.xml files, and the preservation-xml folder will be empty.
+* Replace the first template in the mediainfo-to-preservation.xslt file with the following code to create invalid preservation.xml. The AIPs should be in an error folder named "preservation_invalid". There should also be a text file for each AIP in the error folder with the error messages from validating, which include that the values for title and rights are not valid and that the element "error" is not expected. The AIP metadata folders will contain the mediainfo.xml and preservation.xml files. The mediainfo-xml folder will contain the mediainfo.xml files, and the preservation-xml folder will be empty.
     
    ```
    <xsl:template match="/">
