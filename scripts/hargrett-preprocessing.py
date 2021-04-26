@@ -49,3 +49,5 @@ for item in os.listdir('data'):
 
 # Deletes the now-empty data folder.
 os.rmdir('data')
+
+print("\nScript is complete. AIPs directory should be ready for av_aip.py script.")
