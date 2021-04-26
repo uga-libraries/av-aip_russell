@@ -1,12 +1,16 @@
-# Script for preparing a batch of Hargrett oral history AIPs for the aip-av.py script. A batch is transferred in a
-# single bag to verify that no errors were introduced on transfer.
+"""Script for preparing a batch of Hargrett oral history AIP folders for the aip-av.py script. A batch of folders to be
+transformed into AIPs is transferred to Russell in a single bag to verify that no errors were introduced during
+transfer. This script validates the bag and, if it is valid, removes the AIP folders from the transfer bag. If the
+bag is not valid, the script prints the validation error and ends. """
+
+# Script usage: python3 /path/hargrett-preprocessing.py /path/transfer_bag
 
 import os
 import subprocess
 import sys
 
 # Gets the path to the bag for the batch from the script argument.
-# If it is missing, prints an error message and quit the script.
+# If it is missing, prints an error message and quits the script.
 try:
     bag_path = sys.argv[1]
 except IndexError:
