@@ -64,7 +64,7 @@ In each scenario, verify the log has the correct status for the AIPs and that no
     if aip_folder in os.listdir('.'):
         mediainfo(aip_folder, aip_id, aip_type)
 
-* Replace the first template in the mediainfo-to-preservation.xslt file with the following code to create invalid preservation.xml. The AIPs should be in an error folder named "preservation_invalid" and there should also be a text file in that folder for each AIP with the error messages from validating. The AIP metadata folders will contain the mediainfo.xml and preservation.xml files. The mediainfo-xml folder will contain the mediainfo.xml files, and the preservation-xml folder will be empty.
+* Replace the first template in the mediainfo-to-preservation.xslt file with the following code to create invalid preservation.xml. The AIPs should be in an error folder named "preservation_invalid". There should also be a text file for each AIP in the error folder with the error messages from validating, which include that the values for title and rights are not valid and that the element <error> is not expected. The AIP metadata folders will contain the mediainfo.xml and preservation.xml files. The mediainfo-xml folder will contain the mediainfo.xml files, and the preservation-xml folder will be empty.
     
    ```
    <xsl:template match="/">
@@ -86,7 +86,7 @@ In each scenario, verify the log has the correct status for the AIPs and that no
       </preservation>
    </xsl:template>
 
-* Edit the package() function in aip_av.py as shown below to add a line of code prior to bag validation to delete the sha256 manifest and cause the script to create invalid bags. The AIPs should be in an error folder named "bag_invalid" and there should also be a text file in that folder for each AIP with the error message from validating. There will be a mediainfo.xml and preservation.xml file in the AIP metadata and script output folders.
+* Edit the package() function in aip_av.py as shown below to add a line of code prior to bag validation to delete the SHA256 manifest and cause the script to create invalid bags. The AIPs should be in an error folder named "bag_invalid". There should also be a text file for each AIP in the error folder with the error messages from validating, which include a warning that manifest-sha256.txt exists in the manifest but not the file system and checksum validation errors for sha256 and md5 for manifest-sha256.txt. There will be a mediainfo.xml and preservation.xml file in the AIP metadata folder and script output folders.
   
   ```
   # Validates the bag. If the bag is not valid, moves the AIP to an error folder, saves the validation error to a document in the error folder, and ends this function.
