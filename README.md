@@ -19,6 +19,8 @@ python3 '/path/aip_av.py' '/path/aip-directory'
 
 Prior to running the script, the contents of each AIP should be in a folder named with the AIP ID (Russell) or AIP ID_Title (Hargrett). Each AIP folder must only contain all media or all metadata files. All AIP folders should be in a single folder (AIPs directory).
 
+Each batch of Hargrett AIP folders is to transferred to Russell staff in a bag. Use the hargrett-preprocessing.py script to validate this bag and remove the AIP folders from the bag prior to running this script.
+
 ## Dependencies
 * Mac or Linux operating system
 * [bagit.py](https://github.com/LibraryOfCongress/bagit-python)
