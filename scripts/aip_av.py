@@ -215,11 +215,11 @@ def package(aip, id, aip_type):
 
     # Validates the bag. If the bag is not valid, moves the AIP to an error folder, saves the validation error to a
     # document in the error folder, and ends this function.
-    validate = subprocess.run(f'bagit.py --validate --quiet "{bag_name}"', stderr=subprocess.PIPE, shell=True)
+    validate = subprocess.run(f'bagit.py --validate "{bag_name}"', stderr=subprocess.PIPE, shell=True)
 
     if 'invalid' in str(validate):
         move_error('bag_invalid', bag_name)
-        with open(f'errors/bag_invalid/{id}_bag_validation_error.txt', 'a') as error:
+        with open(f'errors/bag_invalid/{bag_name}_bag_validation_error.txt', 'a') as error:
             lines = str(validate.stderr).split(';')
             for line in lines:
                 error.write(f'{line}\n\n')
