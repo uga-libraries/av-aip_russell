@@ -4,14 +4,14 @@ Use the following instructions for thoroughly testing the aip_av.py script after
 
 ## Testing Valid AIPs
 
-###AIPs to include in the test suite
+### AIPs to include in the test suite
 For each scenario, make one media and one metadata AIP. At least one media and metadata AIP should have the same base AIP ID, e.g., har-ua20-123_0001_media and harg-ua20-123_0001_metadata.
 
 * An AIP with one file in an accepted format.
 * An AIP with at least one file, and sometimes multiple files, in each of the accepted formats.
 * An AIP with some files in accepted formats and some in unaccepted formats. 
 
-###Things to check for
+### Things to check for
 * The script output folders (aips-to-ingest, mediainfo-xml, preservation-xml) are made and have the expected content.
 * No files in accepted formats were deleted.
 * All files in unaccepted formats were deleted.
