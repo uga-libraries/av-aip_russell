@@ -80,9 +80,9 @@ def aip_metadata(aip_folder_name):
             regex = re.match('(har-ua[0-9]{2}-[0-9]{3}_[0-9]{4})_(.*)', aip_folder_name)
             aip_id = regex.group(1)
             title = regex.group(2)
-        except ValueError:
+        except AttributeError:
             move_error("aip_folder_name", aip_folder_name)
-            raise
+            raise AttributeError
     # For Russell, the AIP folder is the AIP ID. The AIP title is made later by combining the AIP ID and type.
     else:
         aip_id = aip_folder_name
@@ -281,7 +281,7 @@ for aip_folder in os.listdir(aips_directory):
     # Determines the department, AIP ID, and for Hargrett the title, from the AIP folder name.
     try:
         department, aip_id, title = aip_metadata(aip_folder)
-    except ValueError:
+    except (ValueError, AttributeError):
         continue
 
     # Deletes undesired files based on the file extension.
