@@ -1,8 +1,8 @@
 # Script for preparing a batch of Hargrett oral history AIPs for the aip-av.py script. A batch is transferred in a
 # single bag to verify that no errors were introduced on transfer.
 
-import bagit
 import os
+import subprocess
 import sys
 
 # Gets the path to the bag for the batch from the script argument.
@@ -25,14 +25,14 @@ except (FileNotFoundError, NotADirectoryError):
 
 # Validates the bag and prints the validation results.
 # If the bag is not valid, quits the script.
-# TODO: switch to using bagit.py.
-try:
-    bag_path.validate()
-    print("Bag is valid")
-except bagit.BagValidationError as e:
-    print("Bag is not valid")
-    print(e)
+validate = subprocess.run(f'bagit.py --validate "{bag_path}"', stderr=subprocess.PIPE, shell=True)
+if 'invalid' in str(validate):
+    print("\nBag is not valid. Details follow:")
+    print(validate)
+    print("\nThe script will quit.")
     exit()
+else:
+    print("\nBag is valid")
 
 # The rest of the script removes the batch of AIP folders from the transfer bag.
 # The end result is a folder (AIPs directory) which contains all the folders to be made into AIPs.
