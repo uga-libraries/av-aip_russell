@@ -2,10 +2,11 @@
 <xsl:stylesheet
 	xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0"
 	xmlns:premis="http://www.loc.gov/premis/v3"
-	xmlns:dc="http://purl.org/dc/terms/">
+	xmlns:dc="http://purl.org/dc/terms/"
+	xpath-default-namespace="https://mediaarea.net/mediainfo">
 	<xsl:output method="xml" indent="yes"/>
 	
-	<!-- This stylesheet creates preservation.xml from Mediainfo XML output.-->
+	<!-- This stylesheet creates preservation.xml from MediaInfo XML output.-->
 	<!-- The preservation.xml file is mostly PREMIS, with 2 Dublin Core fields.-->
     <!-- It is used for importing metadata into the ARCHive (digital preservation storage).--> 
     <!--See the UGA Libraries AIP Definition for details.-->
@@ -55,7 +56,7 @@
     <xsl:variable name="aip-id">
 		<!-- Hargrett identifier format: harg-, ms or ua, optional 2 numbers followed by a dash, 4 numbers, er, 4 numbers.-->
 		<xsl:if test="$department='hargrett'">
-			<xsl:analyze-string select="/Mediainfo/File[1]/track[@type='General']/CompleteName" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}}_[0-9]{{4}})">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}}_[0-9]{{4}})">
 			 	<xsl:matching-substring>
 		 		    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
 		 		</xsl:matching-substring>
@@ -63,7 +64,7 @@
 		</xsl:if>
 		<!-- Russell identifier format: rbrl, 3 numbers, 2-5 lowercase letters, a dash, and any number of lowercase letters, numbers or dashes.-->
 		<xsl:if test="$department='russell'">
-			<xsl:analyze-string select="/Mediainfo/File[1]/track[@type='General']/CompleteName" regex="(rbrl\d{{3}}[a-z]{{2,5}}-[a-z0-9-]+)/objects">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="(rbrl\d{{3}}[a-z]{{2,5}}-[a-z0-9-]+)/objects">
 			 	<xsl:matching-substring>
 		 		    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
 		 		</xsl:matching-substring>
@@ -76,7 +77,7 @@
     <xsl:variable name="collection-id">
 		<!-- Hargrett identifier format: harg-, ms or ua, optional 2 numbers followed by a dash, 4 numbers.-->
 		<xsl:if test="$department='hargrett'">
-			<xsl:analyze-string select="/Mediainfo/File[1]/track[@type='General']/CompleteName" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}})">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}})">
 				<xsl:matching-substring>
                 	<xsl:value-of select="regex-group(1)"/>
             	</xsl:matching-substring>
@@ -84,7 +85,7 @@
 		</xsl:if>
 		<!-- Russell identifier format: rbrl followed by 3 numbers.-->
 		<xsl:if test="$department='russell'">
-			<xsl:analyze-string select="/Mediainfo/File[1]/track[@type='General']/CompleteName" regex="^(rbrl\d{{3}})">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(rbrl\d{{3}})">
 				<xsl:matching-substring>
                 	<xsl:value-of select="regex-group(1)"/>
             	</xsl:matching-substring>
@@ -94,7 +95,7 @@
 		
 	<!-- File count to use in testing when aips are treated differently if they have one or multiple files.-->
 	<xsl:variable name="file-count">
-		<xsl:value-of select="count(/Mediainfo/File/track[@type='General'])"/>
+		<xsl:value-of select="count(/MediaInfo/media)"/>
 	</xsl:variable>
 
 	
@@ -104,8 +105,8 @@
 
     <!-- These templates are used for making components of the format elements in both the aip and filelist sections. -->
 
-    <!-- Structures the format information when the Mediainfo includes the Format field in the general track.-->
-    <!-- Includes the format name, the version if one is present, and a note with what version of Mediainfo was used.-->
+    <!-- Structures the format information when the MediaInfo includes the Format field in the general track.-->
+    <!-- Includes the format name, the version if one is present, and a note with what version of MediaInfo was used.-->
     <xsl:template match="Format">
         <premis:format>
             <premis:formatDesignation>
@@ -115,12 +116,12 @@
                 <!-- Version may come any of the tracks, depending on the format.-->
                 <xsl:apply-templates select="../../track/Format_Version"/>
             </premis:formatDesignation>
-            <xsl:call-template name="Mediainfo-format-note"/>
+            <xsl:call-template name="mediainfo-format-note"/>
         </premis:format>
     </xsl:template>
 
-    <!-- Structures the format information when the Mediainfo has the FileExtension but not Format format field in the general track.-->
-    <!-- Includes the format extension as the name, the version if one is present, and a note with what version of Mediainfo was used.-->
+    <!-- Structures the format information when the MediaInfo has the FileExtension but not Format format field in the general track.-->
+    <!-- Includes the format extension as the name, the version if one is present, and a note with what version of MediaInfo was used.-->
     <!-- The test for if Format is not present is done when the template is applied.-->
     <xsl:template match="FileExtension">
         <premis:format>
@@ -131,7 +132,7 @@
                 <!-- Version may come any of the tracks, depending on the format.-->
                 <xsl:apply-templates select="../../track/Format_Version"/>
             </premis:formatDesignation>
-            <xsl:call-template name="Mediainfo-extension-note"/>
+            <xsl:call-template name="mediainfo-extension-note"/>
         </premis:format>
     </xsl:template>
 
@@ -145,20 +146,20 @@
 		</xsl:if>
 	</xsl:template>
 
-    <!-- Note with the Mediainfo version for when the format name comes from the Format field.-->	
-	<xsl:template name="Mediainfo-format-note">
+    <!-- Note with the MediaInfo version for when the format name comes from the Format field.-->
+	<xsl:template name="mediainfo-format-note">
 		<premis:formatNote>
-			<xsl:text>Format identified by Mediainfo version </xsl:text>
-			<xsl:value-of select="/Mediainfo/@version"/>
+			<xsl:text>Format identified by MediaInfo version </xsl:text>
+			<xsl:value-of select="/MediaInfo/@version"/>
 			<xsl:text>.</xsl:text>
 		</premis:formatNote>
 	</xsl:template>
 
-    <!-- Note with the Mediainfo version for when the format names comes from the FileExtension field.-->
-	<xsl:template name="Mediainfo-extension-note">
+    <!-- Note with the MediaInfo version for when the format names comes from the FileExtension field.-->
+	<xsl:template name="mediainfo-extension-note">
         <premis:formatNote>
-            <xsl:text>Unable to identify format. Instead, file extension identified by Mediainfo version </xsl:text>
-            <xsl:value-of select="/Mediainfo/@version"/>
+            <xsl:text>Unable to identify format. Instead, file extension identified by MediaInfo version </xsl:text>
+            <xsl:value-of select="/MediaInfo/creatingLibrary/@version"/>
             <xsl:text>.</xsl:text>
         </premis:formatNote>
 	</xsl:template>
@@ -201,7 +202,7 @@
     <!-- aip size: PREMIS 1.5.3 (optional): sum of every file size in bytes, formatted as a whole number.-->	
 	<xsl:template name="aip-size">
 		<premis:size>
-			<xsl:value-of select="format-number(sum(/Mediainfo/File/track[@type='General']/FileSize), '#')"/>
+			<xsl:value-of select="format-number(sum(/MediaInfo/media/track[@type='General']/FileSize), '#')"/>
 		</premis:size>
 	</xsl:template>
 	
