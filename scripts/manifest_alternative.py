@@ -6,7 +6,9 @@ import os
 import subprocess
 
 # Extra code to get to the state that we would be after running the previous code in aip_av.py
-aips_directory = "C:/Users/amhan/Desktop/Test_Russell"
+# aips_directory is a folder that contains another folder named aips-to-ingest.
+# aips-to-ingest should contain files with names starting "rbrl" and/or "har"
+aips_directory = "INSERT PATH HERE"
 os.chdir(aips_directory)
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5sum.
