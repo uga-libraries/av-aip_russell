@@ -19,8 +19,12 @@ if not len(os.listdir()) == 0:
     for file in os.listdir():
 
         # Get fixity output for the file and reformat to be md5<tab>filename.
-        md5deep_output = subprocess.run(f"md5deep64 -b {file}", stdout=subprocess.PIPE, shell=True)
-        fixity = bytes.decode(md5deep_output.stdout).strip()
+        md5sum_output = subprocess.run(f"md5sum {file}", stdout=subprocess.PIPE, shell=True)
+        fixity = bytes.decode(md5sum_output.stdout).strip()
+
+        # FOR TESTING ONLY. REMOVE THE # BEFORE THE NEXT TWO LINES TO SEE WHAT MD5SUM OUTPUT IS.
+        #print("All output:", md5sum_output)
+        #print("STDOUT:", md5sum_output.stdout)
 
         # Save the fixity to the correct department manifest.
         if file.startswith("har"):
@@ -31,13 +35,3 @@ if not len(os.listdir()) == 0:
                 manifest.write(f"{fixity}\n")
 else:
     print('\nCould not make manifest. aips-to-ingest is empty.')
-
-"""
-Test Results:
-Correctly prints error if aips-to-ingest is empty.
-Correctly makes the hargrett and/or russell manifests and saves the filename(s) to them.
-Correctly makes manifests for all test cases with md5deep on Windows.
-
-To Do:
-Only Russell, Only Hargrett, and Mix of Both, one file at a time, with md5sum (Mac only).
-"""
