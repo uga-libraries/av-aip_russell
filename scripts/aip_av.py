@@ -318,18 +318,29 @@ for aip_folder in os.listdir(aips_directory):
     if aip_folder in os.listdir('.'):
         package(aip_folder, aip_id, aip_type)
 
-# Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5deep.
-# The manifest is named current-date_department_manifest.txt and saved in the aips-to-ingest folder.
+# Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5sum.
 # The manifest has one line per AIP, formatted md5<tab>filename
-# Checks that aips-to-ingest is not empty (due to errors) before making the manifest.
+# Change the current directory to aips-to-ingest so that no path information is included with the filename.
 os.chdir('aips-to-ingest')
 current_date = datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
+# Checks that aips-to-ingest is not empty (due to script errors) before making the manifest.
 if not len(os.listdir()) == 0:
-    if any(file.startswith('har') for file in os.listdir('.')):
-        subprocess.run(f'md5deep -b har* > {current_date}_hargrett_manifest.txt', shell=True)
-    if any(file.startswith('rbrl') for file in os.listdir('.')):
-        subprocess.run(f'md5deep -b rbrl* > {current_date}_russell_manifest.txt', shell=True)
+    for file in os.listdir():
+
+        # Runs md5sum and extracts the desired information (md5 filename) from the md5sum output.
+        md5sum_output = subprocess.run(f"md5sum {file}", stdout=subprocess.PIPE, shell=True)
+        fixity = bytes.decode(md5sum_output.stdout).strip()
+
+        # Saves the fixity information to the correct department manifest.
+        # The manifest is named current-date_department_manifest.txt and saved in the aips-to-ingest folder.
+        if file.startswith("har"):
+            with open(f"{current_date}_hargrett_manifest.txt", "a") as manifest:
+                manifest.write(f"{fixity}\n")
+        elif file.startswith("rbrl"):
+            with open(f"{current_date}_russell_manifest.txt", "a") as manifest:
+                manifest.write(f"{fixity}\n")
 else:
     print('\nCould not make manifest. aips-to-ingest is empty.')
+
 
 print('\nScript is finished running.')
