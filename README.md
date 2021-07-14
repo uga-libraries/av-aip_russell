@@ -24,13 +24,12 @@ Each batch of Hargrett AIP folders is to transferred to Russell staff in a bag. 
 ## Dependencies
 * Mac or Linux operating system
 * [bagit.py](https://github.com/LibraryOfCongress/bagit-python)
-* [md5deep](https://github.com/jessek/hashdeep)
 * [MediaInfo](https://mediaarea.net/en/MediaInfo)
 * [saxon9he](http://saxon.sourceforge.net/)
 * [xmllint](http://xmlsoft.org/xmllint.html)
 
 ## Installation
-1. Install the dependencies (listed above). Saxon and md5deep may be come with your OS.
+1. Install the dependencies (listed above). Saxon may be come with your OS.
 
 
 2. Download the scripts and stylesheets folders and save to your computer.
@@ -56,7 +55,7 @@ See also the [graphical representation of this workflow](https://github.com/uga-
 7. Bags the aips in place with md5 and sha256 manifests using bagit.py.
 8. Validates the bags using bagit.py.
 9. Runs the perl script prepare_bag on the aip to tar and zip it and saves output to aips-ready-to-ingest.
-10. When all aips are processed, makes a md5 manifest of the packaged aips in the aips-to-ingest folder.
+10. When all aips are processed, makes a md5 manifest of the packaged aips in the aips-to-ingest folder using md5sum.
 
 ## Initial Author
 Adriane Hanson, Head of Digital Stewardship, January 2020
