@@ -64,7 +64,7 @@
 		</xsl:if>
 		<!-- Russell identifier format: rbrl, 3 numbers, 2-5 lowercase letters, a dash, and any number of lowercase letters, numbers or dashes.-->
 		<xsl:if test="$department='russell'">
-			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="(rbrl\d{{3}}[a-z]{{2,5}}-[a-z0-9-]+)/objects">
+			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="(rbrl\d{{3}}[a-z]{{2,5}}-[a-z0-9-]+)">
 			 	<xsl:matching-substring>
 		 		    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
 		 		</xsl:matching-substring>
