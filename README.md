@@ -17,9 +17,7 @@ A log is created by the script with the name of each AIP folder and its final st
 ## Script usage
 python3 '/path/aip_av.py' '/path/aip-directory'
 
-Prior to running the script, the contents of each AIP should be in a folder named with the AIP ID (Russell) or AIP ID_Title (Hargrett). Each AIP folder must only contain all media or all metadata files. All AIP folders should be in a single folder (AIPs directory).
-
-Each batch of Hargrett AIP folders is to transferred to Russell staff in a bag. Use the hargrett-preprocessing.py script to validate this bag and remove the AIP folders from the bag prior to running this script.
+See "Script Input" (below) for details on the AIP Directory.
 
 ## Dependencies
 * Mac or Linux operating system
@@ -37,6 +35,22 @@ Each batch of Hargrett AIP folders is to transferred to Russell staff in a bag. 
 4. Update the group uri in the mediainfo-to-preservation.xslt stylesheet in variable name="uri" (line 52). 
 5. Update the base uri in the premis.xsd in the restriction pattern for objectIdentifierType (line 35).
 5. Change permissions on the scripts so they are executable.
+
+## Script Input (AIPS Directory)
+The content to be transformed into AIPs must be in a single folder, which is the AIPs directory. Within the AIPs directory, there is one folder for each AIP. Each folder must be only media or only metadata files.
+
+### Hargrett script input
+The AIPs directory should be in a bag, since files are transferred over the network before they are transformed into AIPs. The AIP folders are named AIPID_Title. Example AIPs directory:
+
+![Screenshot of Hargrett AIPs Directory](https://github.com/uga-libraries/av-aip_russell/blob/add-hargrett/hargrett-aips-directory.png?raw=true)
+
+Hargrett oral history AIP IDs are formatted har-ua##-###_####
+
+Hargrett title naming conventions are:
+   * Firstname Lastname Interview Recording (for media AIPs)
+   * Firstname Lastname Interview Metadata (for metadata AIPs)
+
+Use the hargrett-preprocessing.py script to validate the AIPs Directory bag and remove the AIP folders from the bag prior to running this script.
 
 ## Workflow Details
 
