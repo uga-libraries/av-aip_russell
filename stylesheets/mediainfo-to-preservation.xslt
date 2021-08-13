@@ -54,7 +54,7 @@
 
     <!-- Combines the identifier from the filename and the aip type.-->
     <xsl:variable name="aip-id">
-		<!-- Hargrett identifier format: harg-, ms or ua, optional 2 numbers followed by a dash, 4 numbers, er, 4 numbers.-->
+		<!-- Hargrett oral history identifier format: har-, ua, 2 numbers followed by a dash, 3 numbers followed by an underscore, 4 numbers.-->
 		<xsl:if test="$department='hargrett'">
 			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}}_[0-9]{{4}})">
 			 	<xsl:matching-substring>
@@ -75,7 +75,7 @@
     <!-- The start of the identifier in the filename.-->
     <!-- The pattern match starts from the beginning because the collection id is repeated in the filepath.-->
     <xsl:variable name="collection-id">
-		<!-- Hargrett identifier format: harg-, ms or ua, optional 2 numbers followed by a dash, 4 numbers.-->
+		<!-- Hargrett oral history identifier format: har-, ua, 2 numbers followed by a dash, 3 numbers followed by an underscore, 4 numbers.-->
 		<xsl:if test="$department='hargrett'">
 			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}})">
 				<xsl:matching-substring>
