@@ -42,7 +42,7 @@ The content to be transformed into AIPs must be in a single folder, which is the
 ### Hargrett script input
 The AIPs directory should be in a bag, since files are transferred over the network before they are transformed into AIPs. The AIP folders are named AIPID_Title. Example AIPs directory:
 
-![Screenshot of Hargrett AIPs Directory](https://github.com/uga-libraries/av-aip_russell/blob/add-hargrett/hargrett-aips-directory.png?raw=true)
+![Screenshot of Hargrett AIPs Directory](https://github.com/uga-libraries/av-aip_russell/blob/main/hargrett-aips-directory.png?raw=true)
 
 Hargrett oral history AIP IDs are formatted har-ua##-###_####, for example har-ua12-003_0001
 
@@ -54,7 +54,7 @@ Use the hargrett-preprocessing.py script to validate the AIPs directory bag and 
 
 ## Workflow Details
 
-See also the [graphical representation of this workflow](https://github.com/uga-libraries/av-aip_russell/blob/master/Russell%20AV%20Preservation%20Script%20Flow%20Diagram.png).
+See also the [graphical representation of this workflow](https://github.com/uga-libraries/av-aip_russell/blob/main/Russell%20AV%20Preservation%20Script%20Flow%20Diagram.png).
 
 1. Deletes files that do not have any of the expected file extensions (.dv, .m4a, .mov, .mp3, .mp4, .wav, .pdf, or .xml) from the AIP folder.
 
