@@ -270,8 +270,8 @@ log("AIP Folder", "Status")
 # present before running each function in case it was moved due to an error in the previous function.
 for aip_folder in os.listdir(aips_directory):
 
-    # Skips folders for script outputs and the log file.
-    if aip_folder in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest', 'log.csv']:
+    # Skips folders for script outputs, the log file, and .DS_Store (temp file on Macs).
+    if aip_folder in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest', 'log.csv', '.DS_Store']:
         continue
 
     # Updates the current AIP number and displays the script progress.
