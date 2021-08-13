@@ -5,7 +5,7 @@ This is the workflow to make archival information packages (AIPs) for Russel Lib
 
 The UGA Libraries has two types of AV AIPs: media and  metadata. The only difference is media AIPs contain the AV files and metadata AIPs contain supporting documentation such as OHMS XML, transcripts, and releases. The media and metadata are kept in two separate AIPs so that the media, which is generally ready for preservation first, can be ingested into ARCHive without delay. Once the metadata is created, it can be added to ARCHive as a separate AIP. If the media and metadata were in the same AIP, when the metadata was ready a new version of the AIP would have to be ingested into ARCHive that contained an identical copy of the media, which is not a good use of our preservation storage space.
 
-As of April 2021, this script also works for creating Hargrett oral history AIPs.
+As of August 2021, this script also works for creating Hargrett oral history AIPs.
 
 ## Script approach
 The script iterates over each folder to be made into an AIP, completing all steps for one folder before starting the next. If a known error is encountered, such as failing a validation test, the folder is moved to an error folder, and the rest of the steps are skipped for that folder.
@@ -15,9 +15,9 @@ Because this script can take some time to complete, particularly when tarring an
 A log is created by the script with the name of each AIP folder and its final status, which is whether the AIP encountered a known error or if it completed, so staff can quickly review the result of a batch of AIPs.
 
 ## Script usage
-python3 '/path/aip_av.py' '/path/aip-directory'
+python3 'path/aip_av.py' 'path/aip-directory'
 
-See "Script Input" (below) for details on the AIP Directory.
+See "Script Input" (below) for details on the AIPs directory.
 
 ## Dependencies
 * Mac or Linux operating system
@@ -44,13 +44,13 @@ The AIPs directory should be in a bag, since files are transferred over the netw
 
 ![Screenshot of Hargrett AIPs Directory](https://github.com/uga-libraries/av-aip_russell/blob/add-hargrett/hargrett-aips-directory.png?raw=true)
 
-Hargrett oral history AIP IDs are formatted har-ua##-###_####
+Hargrett oral history AIP IDs are formatted har-ua##-###_####, for example har-ua12-003_0001
 
 Hargrett title naming conventions are:
    * Firstname Lastname Interview Recording (for media AIPs)
    * Firstname Lastname Interview Metadata (for metadata AIPs)
 
-Use the hargrett-preprocessing.py script to validate the AIPs Directory bag and remove the AIP folders from the bag prior to running this script.
+Use the hargrett-preprocessing.py script to validate the AIPs directory bag and remove the AIP folders from the bag prior to running this script.
 
 ## Workflow Details
 
