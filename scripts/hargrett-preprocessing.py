@@ -3,7 +3,7 @@ transformed into AIPs is transferred to Russell in a single bag to verify that n
 transfer. This script validates the bag and, if it is valid, removes the AIP folders from the transfer bag. If the
 bag is not valid, the script prints the validation error and ends. """
 
-# Script usage: python3 /path/hargrett-preprocessing.py /path/transfer_bag
+# Script usage: python3 path/hargrett-preprocessing.py path/transfer_bag
 
 import os
 import subprocess
@@ -15,7 +15,7 @@ try:
     bag_path = sys.argv[1]
 except IndexError:
     print("The bag path, which is required, is missing.")
-    print("To run the script: python3 /path/hargrett-preprocessing.py /path/bag")
+    print("To run the script: python3 path/hargrett-preprocessing.py path/bag")
     exit()
 
 # Changes the current directory to the bag directory.
@@ -23,8 +23,8 @@ except IndexError:
 try:
     os.chdir(bag_path)
 except (FileNotFoundError, NotADirectoryError):
-    print("The provided bag path is not valid path.")
-    print("To run the script: python3 /path/hargrett-preprocessing.py /path/bag")
+    print("The provided bag path is not valid path:", bag_path)
+    print("To run the script: python3 path/hargrett-preprocessing.py path/bag")
     exit()
 
 # Validates the bag and prints the validation results.
