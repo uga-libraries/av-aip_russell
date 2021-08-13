@@ -6,8 +6,8 @@ Dependencies: bagit.py, md5deep, mediainfo, saxon, xmllint
 Prior to running the script:
 
     1. The contents of each AIP should be in a folder named with the AIP ID (Russell) or AIP ID_Title (Hargrett).
-            Each AIP folder should contain all media or all metadata files.
-    2. All AIP folders should be in a single folder (AIPs directory).
+    2. Each AIP folder should contain all media or all metadata files.
+    3. All AIP folders should be in a single folder (AIPs directory).
 
 Script steps:
 
@@ -25,7 +25,7 @@ Script steps:
 The script also generates a log of the AIPs processed and their final status, either an anticipated error or "complete".
 """
 
-# Script usage: python3 '/path/aip_av.py' '/path/aips-directory'
+# Script usage: python3 'path/aip_av.py' 'path/aips-directory'
 
 import csv
 import datetime
@@ -160,7 +160,8 @@ def preservation_xml(aip, id, aip_type, department, aip_title):
     presxml = f'{aip}/metadata/{id}_{aip_type}_preservation.xml'
 
     # Arguments to add to the saxon command.
-    # Hargrett title was calculated from the AIP folder. Russell title is calculated from the AIP ID and type.
+    # The Hargrett title was previously calculated from the AIP folder.
+    # The Russell title is calculated now by combining the AIP ID and AIP type (media or metadata).
     if not aip_title:
         aip_title = f'{id}_{aip_type}'
     args = f'type={aip_type} department={department} title="{aip_title}"'
@@ -241,7 +242,7 @@ try:
     aips_directory = sys.argv[1]
 except IndexError:
     print('\nThe AIPs directory is missing and is a required argument.')
-    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
+    print("To run the script: python3 'path/aip_av.py' 'path/aips-directory'")
     exit()
 
 # Changes the current directory to the AIPs directory.
@@ -250,7 +251,7 @@ try:
     os.chdir(aips_directory)
 except (FileNotFoundError, NotADirectoryError):
     print(f'\nThe provided AIPs directory "{aips_directory}" is not a valid directory.')
-    print("To run the script: python3 '/path/aip_av.py' '/path/aips-directory'")
+    print("To run the script: python3 'path/aip_av.py' 'path/aips-directory'")
     exit()
 
 # Starts counts for tracking the script progress.
