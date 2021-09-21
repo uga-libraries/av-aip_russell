@@ -52,6 +52,9 @@ Hargrett title naming conventions are:
 
 Use the hargrett-preprocessing.py script to validate the AIPs directory bag and remove the AIP folders from the bag prior to running this script.
 
+### Russell script input
+To be added.
+
 ## Workflow Details
 
 See also the [graphical representation of this workflow](https://github.com/uga-libraries/av-aip_russell/blob/main/Russell%20AV%20Preservation%20Script%20Flow%20Diagram.png).
