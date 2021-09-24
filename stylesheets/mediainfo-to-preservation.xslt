@@ -45,39 +45,19 @@
 	<!-- *************************************************************************************************************** -->
 
     <!-- The parameters are given as arguments when running the xslt via the command line or script.-->
-    <xsl:param name="department" required="yes"/>
+    <xsl:param name="aip-id" required="yes"/>
+	<xsl:param name="department" required="yes"/>
 	<xsl:param name="type" required="yes"/>
 	<xsl:param name="title" required="yes"/>
 	
     <!-- The unique identifier for the group in the ARCHive (digital preservation system).-->
 	<xsl:variable name="uri">INSERT-ARCHive-URI/<xsl:value-of select="$department" /></xsl:variable>
 
-    <!-- Combines the identifier from the filename and the aip type.-->
-    <xsl:variable name="aip-id">
-		<!-- Hargrett oral history identifier format: har-, ua, 2 numbers followed by a dash, 3 numbers followed by an underscore, 4 numbers.-->
-		<xsl:if test="$department='hargrett'">
-			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}}_[0-9]{{4}})">
-			 	<xsl:matching-substring>
-		 		    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
-		 		</xsl:matching-substring>
-			</xsl:analyze-string>
-		</xsl:if>
-		<!-- Russell identifier format: rbrl, 3 numbers, 2-5 lowercase letters, a dash, and any number of lowercase letters, numbers or dashes.-->
-		<xsl:if test="$department='russell'">
-			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="(rbrl\d{{3}}[a-z]{{2,5}}-[a-z0-9-]+)">
-			 	<xsl:matching-substring>
-		 		    <xsl:value-of select="regex-group(1)"/>_<xsl:value-of select="$type"/>
-		 		</xsl:matching-substring>
-			</xsl:analyze-string>
-		</xsl:if>
-	</xsl:variable>
-
-    <!-- The start of the identifier in the filename.-->
-    <!-- The pattern match starts from the beginning because the collection id is repeated in the filepath.-->
+    <!-- Collection ID is the start of the AIP ID.-->
     <xsl:variable name="collection-id">
 		<!-- Hargrett oral history identifier format: har-, ua, 2 numbers followed by a dash, 3 numbers followed by an underscore, 4 numbers.-->
 		<xsl:if test="$department='hargrett'">
-			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}})">
+			<xsl:analyze-string select="$aip-id" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}})">
 				<xsl:matching-substring>
                 	<xsl:value-of select="regex-group(1)"/>
             	</xsl:matching-substring>
@@ -85,7 +65,7 @@
 		</xsl:if>
 		<!-- Russell identifier format: rbrl followed by 3 numbers.-->
 		<xsl:if test="$department='russell'">
-			<xsl:analyze-string select="/MediaInfo/media[1]/@ref" regex="^(rbrl\d{{3}})">
+			<xsl:analyze-string select="$aip-id" regex="^(rbrl\d{{3}})">
 				<xsl:matching-substring>
                 	<xsl:value-of select="regex-group(1)"/>
             	</xsl:matching-substring>

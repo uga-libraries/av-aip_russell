@@ -165,7 +165,7 @@ def preservation_xml(aip, id, aip_type, department, aip_title):
     # The Russell title is None at this point. It is replaced with the full AIP ID.
     if not aip_title:
         aip_title = id
-    args = f'type={aip_type} department={department} title="{aip_title}"'
+    args = f'aip-id={id} type={aip_type} department={department} title="{aip_title}"'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
