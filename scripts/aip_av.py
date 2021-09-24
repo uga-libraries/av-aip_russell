@@ -17,11 +17,11 @@ Script steps:
     4. Deletes unwanted file types.
     5. Determines if the AIP contains media or metadata files (the type).
     6. Updates the AIP ID to include the type.
-    6. Organizes the AIP contents into the AIP directory structure.
-    7. Extracts technical metadata using MediaInfo.
-    8. Converts technical metadata to Dublin Core and PREMIS (preservation.xml) using a stylesheet.
-    9. Packages the AIPs: bag, tar, and zip.
-   10. Makes a md5 manifest of all packaged AIPs.
+    7. Organizes the AIP contents into the AIP directory structure.
+    8. Extracts technical metadata using MediaInfo.
+    9. Converts technical metadata to Dublin Core and PREMIS (preservation.xml) using a stylesheet.
+   10. Packages the AIPs: bag, tar, and zip.
+   11. Makes a md5 manifest of all packaged AIPs.
 
 The script also generates a log of the AIPs processed and their final status, either an anticipated error or "complete".
 """
