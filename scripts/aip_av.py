@@ -60,7 +60,7 @@ def move_error(error_name, aip):
     log(aip, error_name)
 
 
-def aip_metadata(aip_folder_name):
+def aip_metadata(aip_folder_name, aip_type):
     """Returns the department, AIP ID, and title based on the AIP folder name.
     If any values cannot be calculated, raises an error."""
 
@@ -79,16 +79,22 @@ def aip_metadata(aip_folder_name):
     if department == "hargrett":
         try:
             regex = re.match('(har-ua[0-9]{2}-[0-9]{3}_[0-9]{4})_(.*)', aip_folder_name)
-            aip_id = regex.group(1)
+            aip_id = f'{regex.group(1)}_{aip_type}'
             title = regex.group(2)
         except AttributeError:
             move_error("aip_folder_name", aip_folder_name)
             raise AttributeError
-    # For Russell, the AIP folder is the AIP ID.
-    # The AIP title is made in preservation_xml() with the full AIP ID (includes the type).
+
+    # For Russell, the AIP folder is the title. Gets the initial AIP ID from the folder.
+    # The full AIP ID is made by adding the AIP type (_media or _metadata).
     else:
-        aip_id = aip_folder_name
-        title = None
+        try:
+            regex = re.match('([a-z0-9-]+)_', aip_folder_name)
+            aip_id = f'{regex.group(1)}_{aip_type}'
+            title = aip_folder_name
+        except AttributeError:
+            move_error("aip_folder_name", aip_folder_name)
+            raise AttributeError
 
     return department, aip_id, title
 
@@ -280,17 +286,6 @@ for aip_folder in os.listdir(aips_directory):
     current_aip += 1
     print(f'\n>>>Processing {aip_folder} ({current_aip} of {total_aips}).')
 
-    # Determines the department, AIP ID, and for Hargrett the title, from the AIP folder name.
-    # At this point the AIP ID is incomplete. It is the full AIP ID once the type is added.
-    try:
-        department, aip_id, title = aip_metadata(aip_folder)
-    except (ValueError, AttributeError):
-        continue
-
-    # Deletes undesired files based on the file extension.
-    if aip_folder in os.listdir('.'):
-        delete_files(aip_folder)
-
     # Determines the AIP type (metadata or media) based on the file extension of the first digital object.
     # KNOWN ISSUE: assumes the folder only contains metadata or media files, not both.
     # Using a lowercase version of filename so the match isn't case sensitive.
@@ -303,8 +298,19 @@ for aip_folder in os.listdir(aips_directory):
                 aip_type = 'media'
                 break
 
-    # Adds the type to the AIP ID. The full AIP ID is identifier_type.
-    aip_id = f'{aip_id}_{aip_type}'
+    # Determines the department, AIP ID, and for Hargrett the title, from the AIP folder name and AIP type
+    try:
+        department, aip_id, title = aip_metadata(aip_folder, aip_type)
+    except (ValueError, AttributeError):
+        continue
+
+    print(department)
+    print(aip_id)
+    print(title)
+
+    # Deletes undesired files based on the file extension.
+    if aip_folder in os.listdir('.'):
+        delete_files(aip_folder)
 
     # Organizes the AIP folder contents into the AIP directory structure.
     if aip_folder in os.listdir('.'):
