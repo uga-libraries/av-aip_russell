@@ -315,7 +315,6 @@ for aip_folder in os.listdir(aips_directory):
         mediainfo(aip_id)
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
-    # The title passed for Russell is None and the real title is calculated in preservation_xml().
     if aip_id in os.listdir('.'):
         preservation_xml(aip_id, department, title)
 
