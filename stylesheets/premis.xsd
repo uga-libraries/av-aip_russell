@@ -28,14 +28,7 @@
 				
  	<xs:complexType name="objectIdentifier">
 		<xs:sequence>
-			<xs:element name="objectIdentifierType">
-				<xs:simpleType>
-					<!--must a be a uri for the ARCHive-->
-					<xs:restriction base="xs:anyURI">
-						<xs:pattern value="(INSERT-BASE-URI).+" />
-					</xs:restriction>
-				</xs:simpleType>
-			</xs:element>
+			<xs:element name="objectIdentifierType" type="premis:hasString" />
 			<xs:element name="objectIdentifierValue" type="premis:hasString" />
 		</xs:sequence>
 	</xs:complexType>

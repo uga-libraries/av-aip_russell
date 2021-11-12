@@ -14,4 +14,4 @@ STYLESHEETS = 'C:/INSERT-PATH/stylesheets'
 PREPARE_BAG = 'C:/INSERT-PATH/prepare_bag'
 
 # Namespace for AIP identifiers. For UGA, this is the URI for ARCHive.
-#namespace = 'INSERT-NAMESPACE'
+NAMESPACE = 'INSERT-NAMESPACE'

@@ -48,9 +48,10 @@
     <xsl:param name="aip-id" required="yes"/>
 	<xsl:param name="department" required="yes"/>
 	<xsl:param name="title" required="yes"/>
+	<xsl:param name="namespace" required="yes" />
 	
     <!-- The unique identifier for the group in the ARCHive (digital preservation system).-->
-	<xsl:variable name="uri">INSERT-ARCHive-URI/<xsl:value-of select="$department" /></xsl:variable>
+	<xsl:variable name="uri"><xsl:value-of select="$namespace" />/<xsl:value-of select="$department" /></xsl:variable>
 
     <!-- Collection ID is the start of the AIP ID.-->
     <xsl:variable name="collection-id">
