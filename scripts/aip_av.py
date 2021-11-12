@@ -60,9 +60,18 @@ def move_error(error_name, aip):
     log(aip, error_name)
 
 
-def aip_metadata(aip_folder_name, aip_type):
-    """Returns the department, AIP ID, and title based on the AIP folder name.
+def aip_metadata(aip_folder_name):
+    """Returns the department, AIP ID, and title based on the AIP folder name and file formats.
     If any values cannot be calculated, raises an error."""
+
+    # Determines the AIP type (metadata or media) based on the file extension of the first digital object.
+    # KNOWN ISSUE: assumes the folder only contains metadata or media files, not both.
+    # Using a lowercase version of filename so the match isn't case sensitive.
+    first_file = os.listdir(aip_folder_name)[0]
+    if first_file.lower().endswith('.pdf') or first_file.lower().endswith('.xml'):
+        aip_type = 'metadata'
+    else:
+        aip_type = 'media'
 
     # Determines the department based on the start of the AIP folder name.
     # If it does not start with an expected value, raises an error so processing can stop on this AIP.
@@ -74,7 +83,8 @@ def aip_metadata(aip_folder_name, aip_type):
         move_error('department_unknown', aip_folder_name)
         raise ValueError
 
-    # For Hargrett, gets the AIP ID and title from the AIP folder name, which is formatted AIPID_Title.
+    # For Hargrett, gets the identifier and title from the AIP folder name, which is formatted identifier_Title.
+    # Then makes the AIP ID by adding the type (metadata or media) to the identifier.
     # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
     if department == "hargrett":
         try:
@@ -85,8 +95,9 @@ def aip_metadata(aip_folder_name, aip_type):
             move_error("aip_folder_name", aip_folder_name)
             raise AttributeError
 
-    # For Russell, the AIP folder is the title. Gets the initial AIP ID from the folder.
-    # The full AIP ID is made by adding the AIP type (_media or _metadata).
+    # For Russell, the title is the AIP folder, which is formatted identifier_lastname.
+    # Then makes the AIP ID by getting the identifier from the AIP folder and adding the type (metadata or media).
+    # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
     else:
         try:
             regex = re.match('([a-z0-9-]+)_', aip_folder_name)
@@ -286,23 +297,13 @@ for aip_folder in os.listdir(aips_directory):
     current_aip += 1
     print(f'\n>>>Processing {aip_folder} ({current_aip} of {total_aips}).')
 
-    # Determines the AIP type (metadata or media) based on the file extension of the first digital object.
-    # KNOWN ISSUE: assumes the folder only contains metadata or media files, not both.
-    # Using a lowercase version of filename so the match isn't case sensitive.
-    if aip_folder in os.listdir('.'):
-        for file in os.listdir(aip_folder):
-            if file.lower().endswith('.pdf') or file.lower().endswith('.xml'):
-                aip_type = 'metadata'
-                break
-            else:
-                aip_type = 'media'
-                break
-
-    # Determines the department, AIP ID, and for Hargrett the title, from the AIP folder name and AIP type
+    # Determines the department, AIP ID, AIP title from the AIP folder name and file formats.
     try:
-        department, aip_id, title = aip_metadata(aip_folder, aip_type)
+        department, aip_id, title = aip_metadata(aip_folder)
     except (ValueError, AttributeError):
         continue
+
+    print(department, aip_id, title)
 
     # Deletes undesired files based on the file extension.
     if aip_folder in os.listdir('.'):
@@ -319,7 +320,7 @@ for aip_folder in os.listdir(aips_directory):
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
     # The title passed for Russell is None and the real title is calculated in preservation_xml().
     if aip_folder in os.listdir('.'):
-        preservation_xml(aip_folder, aip_id, aip_type, department, title)
+        preservation_xml(aip_folder, aip_id, department, title)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_folder in os.listdir('.'):
