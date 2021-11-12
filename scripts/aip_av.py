@@ -5,7 +5,7 @@ Dependencies: bagit.py, md5deep, mediainfo, saxon, xmllint
 
 Prior to running the script:
 
-    1. The contents of each AIP should be in a folder named with the AIP ID (Russell) or AIP ID_Title (Hargrett).
+    1. The contents of each AIP should be in a folder named with the AIP title (Russell) or AIP ID_Title (Hargrett).
     2. Each AIP folder should contain all media or all metadata files.
     3. All AIP folders should be in a single folder (AIPs directory).
 
@@ -13,15 +13,13 @@ Script steps:
 
     1. Verifies the script argument (AIPs directory) is correct.
     2. Makes folders for script outputs within the AIPs directory.
-    3. Determines the department, AIP ID, and for Hargrett the title, from the AIP folder.
-    4. Deletes unwanted file types.
-    5. Determines if the AIP contains media or metadata files (the type).
-    6. Updates the AIP ID to include the type.
-    7. Organizes the AIP contents into the AIP directory structure.
-    8. Extracts technical metadata using MediaInfo.
-    9. Converts technical metadata to Dublin Core and PREMIS (preservation.xml) using a stylesheet.
-   10. Packages the AIPs: bag, tar, and zip.
-   11. Makes a md5 manifest of all packaged AIPs.
+    3. Deletes unwanted file types.
+    4. Determines the department, AIP ID, and AIP title from the AIP folder and file formats.
+    5. Organizes the AIP contents into the AIP directory structure.
+    6. Extracts technical metadata using MediaInfo.
+    7. Converts technical metadata to Dublin Core and PREMIS (preservation.xml) using a stylesheet.
+    8. Packages the AIPs: bag, tar, and zip.
+    9. Makes a md5 manifest of all packaged AIPs.
 
 The script also generates a log of the AIPs processed and their final status, either an anticipated error or "complete".
 """
@@ -58,6 +56,22 @@ def move_error(error_name, aip):
 
     # Adds the error to a log in the AIPs directory.
     log(aip, error_name)
+
+
+def delete_files(aip_folder_name):
+    """Deletes unwanted files based on their file extension."""
+
+    # Deletes files if the file extension is not in the keep list.
+    # Using a lowercase version of filename so the match isn't case sensitive.
+    keep = ['.dv', '.m4a', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
+    for root, directories, files in os.walk(aip_folder_name):
+        for file in files:
+            if not (any(file.lower().endswith(s) for s in keep)):
+                os.remove(f'{root}/{file}')
+
+    # If deleting the unwanted files left the AIP folder empty, moves the AIP to an error folder.
+    if len(os.listdir(aip_folder_name)) == 0:
+        move_error("all_files_deleted", aip_folder_name)
 
 
 def aip_metadata(aip_folder_name):
@@ -108,22 +122,6 @@ def aip_metadata(aip_folder_name):
             raise AttributeError
 
     return department, aip_id, title
-
-
-def delete_files(aip_folder_name):
-    """Deletes unwanted files based on their file extension."""
-
-    # Deletes files if the file extension is not in the keep list.
-    # Using a lowercase version of filename so the match isn't case sensitive.
-    keep = ['.dv', '.m4a', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
-    for root, directories, files in os.walk(aip_folder_name):
-        for file in files:
-            if not (any(file.lower().endswith(s) for s in keep)):
-                os.remove(f'{root}/{file}')
-
-    # If deleting the unwanted files left the AIP folder empty, moves the AIP to an error folder.
-    if len(os.listdir(aip_folder_name)) == 0:
-        move_error("all_files_deleted", aip_folder_name)
 
 
 def aip_directory(aip_folder_name, aip):
@@ -181,7 +179,7 @@ def preservation_xml(aip, department, aip_title):
     pres_xml = f'{aip}/metadata/{aip}_preservation.xml'
 
     # Arguments to add to the saxon command.
-    args = f'aip-id={aip} department={department} title="{aip_title}"'
+    args = f'aip-id={aip} department={department} title="{aip_title}" namespace={NAMESPACE}'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
@@ -306,8 +304,6 @@ for aip_folder in os.listdir(aips_directory):
             department, aip_id, title = aip_metadata(aip_folder)
         except (ValueError, AttributeError):
             continue
-
-    print(department, aip_id, title)
 
     # Organizes the AIP folder contents into the AIP directory structure.
     # After this step, the AIP folder is renamed to be the AIP ID.
