@@ -126,7 +126,7 @@ def delete_files(aip_folder_name):
         move_error("all_files_deleted", aip_folder_name)
 
 
-def aip_directory(aip_folder_name, aip_id):
+def aip_directory(aip_folder_name, aip):
     """Makes the AIP directory structure (objects and metadata folder within the AIP folder),
     moves the digital objects to the objects folder, and renames the AIP folder to the AIP ID. """
 
@@ -150,10 +150,10 @@ def aip_directory(aip_folder_name, aip_id):
     os.mkdir(f'{aip_folder_name}/metadata')
 
     # Renames the AIP folder to the AIP ID.
-    os.replace(aip_folder_name, aip_id)
+    os.replace(aip_folder_name, aip)
 
 
-def mediainfo(aip, identifier):
+def mediainfo(aip):
     """Extracts technical metadata from the files in the objects folder using MediaInfo."""
     # KNOWN ISSUE: mediainfo can identify PDF versions but only identifies OHMS xml by the file extension.
 
@@ -161,31 +161,27 @@ def mediainfo(aip, identifier):
     # --'Output=XML' uses the XML structure that started with MediaInfo 18.03
     # --'Language=raw' outputs the size in bytes.
     subprocess.run(
-        f'mediainfo -f --Output=XML --Language=raw "{aip}/objects" > "{aip}/metadata/{identifier}_mediainfo.xml"', shell=True)
+        f'mediainfo -f --Output=XML --Language=raw "{aip}/objects" > "{aip}/metadata/{aip}_mediainfo.xml"', shell=True)
 
     # Copies the MediaInfo XML to a separate folder (mediainfo-xml) for staff reference.
     # If a file by that name is already in mediainfo-xml,
     #   moves the AIP to an error folder instead since the AIP may be a duplicate.
-    if os.path.exists(f'mediainfo-xml/{identifier}_mediainfo.xml'):
+    if os.path.exists(f'mediainfo-xml/{aip}_mediainfo.xml'):
         move_error('preexisting_mediainfo_copy', aip)
     else:
-        shutil.copy2(f'{aip}/metadata/{identifier}_mediainfo.xml', 'mediainfo-xml')
+        shutil.copy2(f'{aip}/metadata/{aip}_mediainfo.xml', 'mediainfo-xml')
 
 
-def preservation_xml(aip, identifier, department, aip_title):
+def preservation_xml(aip, department, aip_title):
     """Creates PREMIS and Dublin Core metadata from the MediaInfo XML and saves it as a preservation.xml file."""
 
     # Paths to files used in the saxon command.
-    media_xml = f'{aip}/metadata/{identifier}_mediainfo.xml'
+    media_xml = f'{aip}/metadata/{aip}_mediainfo.xml'
     xslt = f'{stylesheets}/mediainfo-to-preservation.xslt'
-    pres_xml = f'{aip}/metadata/{identifier}_preservation.xml'
+    pres_xml = f'{aip}/metadata/{aip}_preservation.xml'
 
     # Arguments to add to the saxon command.
-    # The Hargrett title was previously calculated from the AIP folder.
-    # The Russell title is None at this point. It is replaced with the full AIP ID.
-    if not aip_title:
-        aip_title = identifier
-    args = f'aip-id={identifier} department={department} title="{aip_title}"'
+    args = f'aip-id={aip} department={department} title="{aip_title}"'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
@@ -208,7 +204,7 @@ def preservation_xml(aip, identifier, department, aip_title):
     # staff use.
     if 'failed to load' in str(validate) or 'fails to validate' in str(validate):
         move_error('preservation_invalid', aip)
-        with open(f'errors/preservation_invalid/{identifier}_preservationxml_validation_error.txt', 'a') as error:
+        with open(f'errors/preservation_invalid/{aip}_preservationxml_validation_error.txt', 'a') as error:
             lines = str(validate.stderr).split('\\n')
             for line in lines:
                 error.write(f'{line}\n\n')
@@ -216,7 +212,7 @@ def preservation_xml(aip, identifier, department, aip_title):
         shutil.copy2(pres_xml, 'preservation-xml')
 
 
-def package(aip, identifier):
+def package(aip):
     """Bags, tars, and zips the AIP. Renames the AIP folder to AIPID_bag."""
 
     # Deletes any .DS_Store files because they cause errors with bag validation. They would have been deleted by
@@ -232,7 +228,7 @@ def package(aip, identifier):
 
     # Renames the AIP folder to add the AIP type and '_bag' to the end.
     # This is saved to a variable first since it is used a few more times in the function.
-    bag_name = f'{identifier}_bag'
+    bag_name = f'{aip}_bag'
     os.replace(aip, bag_name)
 
     # Validates the bag. If the bag is not valid, moves the AIP to an error folder, saves the validation error to a
@@ -319,17 +315,17 @@ for aip_folder in os.listdir(aips_directory):
         aip_directory(aip_folder, aip_id)
 
     # Extracts technical metadata from the files using MediaInfo.
-    if aip_folder in os.listdir('.'):
-        mediainfo(aip_folder, aip_id)
+    if aip_id in os.listdir('.'):
+        mediainfo(aip_id)
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
     # The title passed for Russell is None and the real title is calculated in preservation_xml().
-    if aip_folder in os.listdir('.'):
-        preservation_xml(aip_folder, aip_id, department, title)
+    if aip_id in os.listdir('.'):
+        preservation_xml(aip_id, department, title)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
-    if aip_folder in os.listdir('.'):
-        package(aip_folder, aip_id)
+    if aip_id in os.listdir('.'):
+        package(aip_id)
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5sum.
 # The manifest has one line per AIP, formatted md5<tab>filename
