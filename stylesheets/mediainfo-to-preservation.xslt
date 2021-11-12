@@ -47,7 +47,6 @@
     <!-- The parameters are given as arguments when running the xslt via the command line or script.-->
     <xsl:param name="aip-id" required="yes"/>
 	<xsl:param name="department" required="yes"/>
-	<xsl:param name="type" required="yes"/>
 	<xsl:param name="title" required="yes"/>
 	
     <!-- The unique identifier for the group in the ARCHive (digital preservation system).-->
