@@ -126,9 +126,9 @@ def delete_files(aip_folder_name):
         move_error("all_files_deleted", aip_folder_name)
 
 
-def aip_directory(aip_folder_name):
-    """Makes the AIP directory structure (objects and metadata folder within the AIP folder) and moves the digital
-    objects to the objects folder. """
+def aip_directory(aip_folder_name, aip_id):
+    """Makes the AIP directory structure (objects and metadata folder within the AIP folder),
+    moves the digital objects to the objects folder, and renames the AIP folder to the AIP ID. """
 
     # Makes the objects folder within the AIP folder, if it doesn't exist. If there is already a folder named objects
     # in the first level within the AIP folder, moves the AIP to an error folder and ends this function. Do not want
@@ -148,6 +148,9 @@ def aip_directory(aip_folder_name):
     # Makes the metadata folder within the AIP folder.
     # Do not have to check if it already exists since everything is moved to the objects folder in the previous step.
     os.mkdir(f'{aip_folder_name}/metadata')
+
+    # Renames the AIP folder to the AIP ID.
+    os.replace(aip_folder_name, aip_id)
 
 
 def mediainfo(aip, identifier):
@@ -311,8 +314,9 @@ for aip_folder in os.listdir(aips_directory):
     print(department, aip_id, title)
 
     # Organizes the AIP folder contents into the AIP directory structure.
+    # After this step, the AIP folder is renamed to be the AIP ID.
     if aip_folder in os.listdir('.'):
-        aip_directory(aip_folder)
+        aip_directory(aip_folder, aip_id)
 
     # Extracts technical metadata from the files using MediaInfo.
     if aip_folder in os.listdir('.'):
