@@ -1,3 +1,6 @@
 
 # PyCharm local files
 .idea/
+*.pyc
+
+scripts/configuration.py

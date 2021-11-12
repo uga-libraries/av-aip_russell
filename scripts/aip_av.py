@@ -35,7 +35,7 @@ import re
 import shutil
 import subprocess
 import sys
-from variables import *
+from configuration import *
 
 
 def log(aip, message):
@@ -177,7 +177,7 @@ def preservation_xml(aip, department, aip_title):
 
     # Paths to files used in the saxon command.
     media_xml = f'{aip}/metadata/{aip}_mediainfo.xml'
-    xslt = f'{stylesheets}/mediainfo-to-preservation.xslt'
+    xslt = f'{STYLESHEETS}/mediainfo-to-preservation.xslt'
     pres_xml = f'{aip}/metadata/{aip}_preservation.xml'
 
     # Arguments to add to the saxon command.
@@ -186,7 +186,7 @@ def preservation_xml(aip, department, aip_title):
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
     if os.path.exists(media_xml):
-        subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{media_xml}" -xsl:"{xslt}" -o:"{pres_xml}" {args}',
+        subprocess.run(f'java -cp "{SAXON}" net.sf.saxon.Transform -s:"{media_xml}" -xsl:"{xslt}" -o:"{pres_xml}" {args}',
                        shell=True)
     else:
         move_error('no_mediainfo_xml', aip)
@@ -196,7 +196,7 @@ def preservation_xml(aip, department, aip_title):
     # Possible validation errors:
     #   preservation.xml was not made (failed to loaded)
     #   preservation.xml does not match the metadata requirements (fails to validate)
-    validate = subprocess.run(f'xmllint --noout -schema "{stylesheets}/preservation.xsd" "{pres_xml}"',
+    validate = subprocess.run(f'xmllint --noout -schema "{STYLESHEETS}/preservation.xsd" "{pres_xml}"',
                               stderr=subprocess.PIPE, shell=True)
 
     # If the preservation.xml isn't valid, moves the AIP to an error folder and saves the validation error to a text
@@ -246,7 +246,7 @@ def package(aip):
     # Tars and zips the AIP using a Perl script.
     # The script also adds the uncompressed file size to the filename.
     # The tarred and zipped AIP is saved to the aips-to-ingest folder.
-    subprocess.run(f'perl "{prepare_bag}" "{bag_name}" aips-to-ingest', shell=True)
+    subprocess.run(f'perl "{PREPARE_BAG}" "{bag_name}" aips-to-ingest', shell=True)
 
     # Adds the AIP to the log for successfully completing, since this function is the last step.
     log(aip_folder, "Complete")
