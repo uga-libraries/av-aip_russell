@@ -110,23 +110,23 @@ def aip_metadata(aip_folder_name):
     return department, aip_id, title
 
 
-def delete_files(aip):
+def delete_files(aip_folder_name):
     """Deletes unwanted files based on their file extension."""
 
     # Deletes files if the file extension is not in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
     keep = ['.dv', '.m4a', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
-    for root, directories, files in os.walk(aip):
+    for root, directories, files in os.walk(aip_folder_name):
         for file in files:
             if not (any(file.lower().endswith(s) for s in keep)):
                 os.remove(f'{root}/{file}')
 
     # If deleting the unwanted files left the AIP folder empty, moves the AIP to an error folder.
-    if len(os.listdir(aip)) == 0:
-        move_error("all_files_deleted", aip)
+    if len(os.listdir(aip_folder_name)) == 0:
+        move_error("all_files_deleted", aip_folder_name)
 
 
-def aip_directory(aip):
+def aip_directory(aip_folder_name):
     """Makes the AIP directory structure (objects and metadata folder within the AIP folder) and moves the digital
     objects to the objects folder. """
 
@@ -134,23 +134,23 @@ def aip_directory(aip):
     # in the first level within the AIP folder, moves the AIP to an error folder and ends this function. Do not want
     # to alter the original directory structure by adding to an original folder named objects.
     try:
-        os.mkdir(f'{aip}/objects')
+        os.mkdir(f'{aip_folder_name}/objects')
     except FileExistsError:
-        move_error('preexisting_objects_folder', aip)
+        move_error('preexisting_objects_folder', aip_folder_name)
         return
 
     # Moves the contents of the AIP folder into the objects folder.
-    for item in os.listdir(aip):
+    for item in os.listdir(aip_folder_name):
         if item == 'objects':
             continue
-        os.replace(f'{aip}/{item}', f'{aip}/objects/{item}')
+        os.replace(f'{aip_folder_name}/{item}', f'{aip_folder_name}/objects/{item}')
 
     # Makes the metadata folder within the AIP folder.
     # Do not have to check if it already exists since everything is moved to the objects folder in the previous step.
-    os.mkdir(f'{aip}/metadata')
+    os.mkdir(f'{aip_folder_name}/metadata')
 
 
-def mediainfo(aip, id):
+def mediainfo(aip, identifier):
     """Extracts technical metadata from the files in the objects folder using MediaInfo."""
     # KNOWN ISSUE: mediainfo can identify PDF versions but only identifies OHMS xml by the file extension.
 
@@ -158,36 +158,36 @@ def mediainfo(aip, id):
     # --'Output=XML' uses the XML structure that started with MediaInfo 18.03
     # --'Language=raw' outputs the size in bytes.
     subprocess.run(
-        f'mediainfo -f --Output=XML --Language=raw "{aip}/objects" > "{aip}/metadata/{id}_mediainfo.xml"', shell=True)
+        f'mediainfo -f --Output=XML --Language=raw "{aip}/objects" > "{aip}/metadata/{identifier}_mediainfo.xml"', shell=True)
 
     # Copies the MediaInfo XML to a separate folder (mediainfo-xml) for staff reference.
     # If a file by that name is already in mediainfo-xml,
     #   moves the AIP to an error folder instead since the AIP may be a duplicate.
-    if os.path.exists(f'mediainfo-xml/{id}_mediainfo.xml'):
+    if os.path.exists(f'mediainfo-xml/{identifier}_mediainfo.xml'):
         move_error('preexisting_mediainfo_copy', aip)
     else:
-        shutil.copy2(f'{aip}/metadata/{id}_mediainfo.xml', 'mediainfo-xml')
+        shutil.copy2(f'{aip}/metadata/{identifier}_mediainfo.xml', 'mediainfo-xml')
 
 
-def preservation_xml(aip, id, department, aip_title):
+def preservation_xml(aip, identifier, department, aip_title):
     """Creates PREMIS and Dublin Core metadata from the MediaInfo XML and saves it as a preservation.xml file."""
 
     # Paths to files used in the saxon command.
-    mediaxml = f'{aip}/metadata/{id}_mediainfo.xml'
+    media_xml = f'{aip}/metadata/{identifier}_mediainfo.xml'
     xslt = f'{stylesheets}/mediainfo-to-preservation.xslt'
-    presxml = f'{aip}/metadata/{id}_preservation.xml'
+    pres_xml = f'{aip}/metadata/{identifier}_preservation.xml'
 
     # Arguments to add to the saxon command.
     # The Hargrett title was previously calculated from the AIP folder.
     # The Russell title is None at this point. It is replaced with the full AIP ID.
     if not aip_title:
-        aip_title = id
-    args = f'aip-id={id} department={department} title="{aip_title}"'
+        aip_title = identifier
+    args = f'aip-id={identifier} department={department} title="{aip_title}"'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
-    if os.path.exists(mediaxml):
-        subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{mediaxml}" -xsl:"{xslt}" -o:"{presxml}" {args}',
+    if os.path.exists(media_xml):
+        subprocess.run(f'java -cp "{saxon}" net.sf.saxon.Transform -s:"{media_xml}" -xsl:"{xslt}" -o:"{pres_xml}" {args}',
                        shell=True)
     else:
         move_error('no_mediainfo_xml', aip)
@@ -197,7 +197,7 @@ def preservation_xml(aip, id, department, aip_title):
     # Possible validation errors:
     #   preservation.xml was not made (failed to loaded)
     #   preservation.xml does not match the metadata requirements (fails to validate)
-    validate = subprocess.run(f'xmllint --noout -schema "{stylesheets}/preservation.xsd" "{presxml}"',
+    validate = subprocess.run(f'xmllint --noout -schema "{stylesheets}/preservation.xsd" "{pres_xml}"',
                               stderr=subprocess.PIPE, shell=True)
 
     # If the preservation.xml isn't valid, moves the AIP to an error folder and saves the validation error to a text
@@ -205,15 +205,15 @@ def preservation_xml(aip, id, department, aip_title):
     # staff use.
     if 'failed to load' in str(validate) or 'fails to validate' in str(validate):
         move_error('preservation_invalid', aip)
-        with open(f'errors/preservation_invalid/{id}_preservationxml_validation_error.txt', 'a') as error:
+        with open(f'errors/preservation_invalid/{identifier}_preservationxml_validation_error.txt', 'a') as error:
             lines = str(validate.stderr).split('\\n')
             for line in lines:
                 error.write(f'{line}\n\n')
     else:
-        shutil.copy2(presxml, 'preservation-xml')
+        shutil.copy2(pres_xml, 'preservation-xml')
 
 
-def package(aip, id):
+def package(aip, identifier):
     """Bags, tars, and zips the AIP. Renames the AIP folder to AIPID_bag."""
 
     # Deletes any .DS_Store files because they cause errors with bag validation. They would have been deleted by
@@ -229,7 +229,7 @@ def package(aip, id):
 
     # Renames the AIP folder to add the AIP type and '_bag' to the end.
     # This is saved to a variable first since it is used a few more times in the function.
-    bag_name = f'{id}_bag'
+    bag_name = f'{identifier}_bag'
     os.replace(aip, bag_name)
 
     # Validates the bag. If the bag is not valid, moves the AIP to an error folder, saves the validation error to a
