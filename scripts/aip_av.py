@@ -297,17 +297,18 @@ for aip_folder in os.listdir(aips_directory):
     current_aip += 1
     print(f'\n>>>Processing {aip_folder} ({current_aip} of {total_aips}).')
 
-    # Determines the department, AIP ID, AIP title from the AIP folder name and file formats.
-    try:
-        department, aip_id, title = aip_metadata(aip_folder)
-    except (ValueError, AttributeError):
-        continue
-
-    print(department, aip_id, title)
-
     # Deletes undesired files based on the file extension.
     if aip_folder in os.listdir('.'):
         delete_files(aip_folder)
+
+    # Determines the department, AIP ID, AIP title from the AIP folder name and file formats.
+    if aip_folder in os.listdir('.'):
+        try:
+            department, aip_id, title = aip_metadata(aip_folder)
+        except (ValueError, AttributeError):
+            continue
+
+    print(department, aip_id, title)
 
     # Organizes the AIP folder contents into the AIP directory structure.
     if aip_folder in os.listdir('.'):
