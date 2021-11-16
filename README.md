@@ -27,14 +27,12 @@ See "Script Input" (below) for details on the AIPs directory.
 * [xmllint](http://xmlsoft.org/xmllint.html)
 
 ## Installation
-1. Install the dependencies (listed above). Saxon may be come with your OS.
+1. Install the dependencies (listed above). Saxon may come with your OS.
 
 
-2. Download the scripts and stylesheets folders and save to your computer.
-3. Update the variables in the variables.py script for the file paths on your local machine.
-4. Update the group uri in the mediainfo-to-preservation.xslt stylesheet in variable name="uri" (line 52). 
-5. Update the base uri in the premis.xsd in the restriction pattern for objectIdentifierType (line 35).
-5. Change permissions on the scripts so they are executable.
+2. Download this repository and save to your computer.
+3. Use the configuration_template.py to make a file named configuration.py with file path variables for your local machine.
+4. Change permissions on the scripts so they are executable.
 
 ## Script Input (AIPS Directory)
 The content to be transformed into AIPs must be in a single folder, which is the AIPs directory. Within the AIPs directory, there is one folder for each AIP. Each folder must be only media or only metadata files.
@@ -53,7 +51,7 @@ Hargrett title naming conventions are:
 Use the hargrett-preprocessing.py script to validate the AIPs directory bag and remove the AIP folders from the bag prior to running this script.
 
 ### Russell script input
-To be added.
+Russell AIP folders should be named with the AIP title. The naming convention is identifier_lastname where the identifier is the AIP ID without the type (media or metadata) suffix.
 
 ## Workflow Details
 
@@ -62,20 +60,21 @@ See also the [graphical representation of this workflow](https://github.com/uga-
 1. Deletes files that do not have any of the expected file extensions (.dv, .m4a, .mov, .mp3, .mp4, .wav, .pdf, or .xml) from the AIP folder.
 
 
-2. Determines if the aip contains metadata or media files based on the file extensions. This is used in the names of all script outputs.
-3. Structures the aip folder contents:
+2. Determines the department, AIP ID, and AIP title from the AIP folder name and file formats.
+3. Structures the AIP folder contents:
     1. Makes a folder named objects and moves all files and folders into it.
-    2. Makes a folder named metadata for script outputs. 
+    2. Makes a folder named metadata for script outputs.
+    3. Renames the AIP folder to the AIP ID.
 4. Runs MediaInfo on the objects folder and saves the result in the metadata folder.
 5. Transforms the MediaInfo xml into the preservation.xml (PREMIS technical metadata) file using saxon and xslt.
 6. Validates the preservation.xml with xmllint and xsd's.
-7. Bags the aips in place with md5 and sha256 manifests using bagit.py.
+7. Bags the AIP in place with md5 and sha256 manifests using bagit.py.
 8. Validates the bags using bagit.py.
-9. Runs the perl script prepare_bag on the aip to tar and zip it and saves output to aips-ready-to-ingest.
-10. When all aips are processed, makes a md5 manifest of the packaged aips in the aips-to-ingest folder using md5sum.
+9. Runs the perl script prepare_bag on the AIP to tar and zip it and saves output to aips-ready-to-ingest.
+10. When all AIPs are processed, makes a md5 manifest of the packaged AIPs in the aips-to-ingest folder using md5sum.
 
 ## Initial Author
 Adriane Hanson, Head of Digital Stewardship, January 2020
 
 ## Acknowledgements
-These scripts were adapted from [bash scripts developed by Iva Dimitrova](https://github.com/uga-libraries/aip-mac-bash-mediainfo). These were used by the Russell Library for making AV aips from 2017 to 2019.
+These scripts were adapted from [bash scripts developed by Iva Dimitrova](https://github.com/uga-libraries/aip-mac-bash-mediainfo). These were used by the Russell Library for making AV AIPs from 2017 to 2019.
