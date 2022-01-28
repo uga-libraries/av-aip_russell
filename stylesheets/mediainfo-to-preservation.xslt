@@ -63,9 +63,9 @@
             	</xsl:matching-substring>
 			</xsl:analyze-string>
 		</xsl:if>
-		<!-- Russell identifier format: rbrl followed by 3 numbers.-->
+		<!-- Russell identifier format: rbrl followed by 3 numbers with optional dash after rbrl.-->
 		<xsl:if test="$department='russell'">
-			<xsl:analyze-string select="$aip-id" regex="^(rbrl\d{{3}})">
+			<xsl:analyze-string select="$aip-id" regex="^(rbrl-?\d{{3}})">
 				<xsl:matching-substring>
                 	<xsl:value-of select="regex-group(1)"/>
             	</xsl:matching-substring>
