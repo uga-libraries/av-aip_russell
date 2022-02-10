@@ -63,7 +63,7 @@ def delete_files(aip_folder_name):
 
     # Deletes files if the file extension is not in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
-    keep = ['.dv', '.m4a', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
+    keep = ['.dv', '.m4a', '.mkv', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
     for root, directories, files in os.walk(aip_folder_name):
         for file in files:
             if not (any(file.lower().endswith(s) for s in keep)):
