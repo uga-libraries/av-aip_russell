@@ -86,22 +86,21 @@
     <!-- These templates are used for making components of the format elements in both the aip and filelist sections. -->
 
     <!-- Structures the format information when the MediaInfo includes the Format field in the general track.-->
-    <!-- Includes the format name, the version if one is present, and a note with what version of MediaInfo was used.-->
+    <!-- Includes the format name, the version if one is present in the general track, and a note with what version of MediaInfo was used.-->
     <xsl:template match="Format">
         <premis:format>
             <premis:formatDesignation>
                 <premis:formatName>
                     <xsl:value-of select="."/>
                 </premis:formatName>
-                <!-- Version may come any of the tracks, depending on the format.-->
-                <xsl:apply-templates select="../../track/Format_Version"/>
+                <xsl:apply-templates select="../../track[@type='General']/Format_Version"/>
             </premis:formatDesignation>
             <xsl:call-template name="mediainfo-format-note"/>
         </premis:format>
     </xsl:template>
 
     <!-- Structures the format information when the MediaInfo has the FileExtension but not Format format field in the general track.-->
-    <!-- Includes the format extension as the name, the version if one is present, and a note with what version of MediaInfo was used.-->
+    <!-- Includes the format extension as the name, the version if one is present in the general track, and a note with what version of MediaInfo was used.-->
     <!-- The test for if Format is not present is done when the template is applied.-->
     <xsl:template match="FileExtension">
         <premis:format>
@@ -109,8 +108,7 @@
                 <premis:formatName>
                     <xsl:value-of select="."/>
                 </premis:formatName>
-                <!-- Version may come any of the tracks, depending on the format.-->
-                <xsl:apply-templates select="../../track/Format_Version"/>
+                <xsl:apply-templates select="../../track[@type='General']/Format_Version"/>
             </premis:formatDesignation>
             <xsl:call-template name="mediainfo-extension-note"/>
         </premis:format>
@@ -190,12 +188,12 @@
     <!-- Format names are from the Format field, or if there is not one then the FileExtension field.-->
     <!-- Uniqueness is determined by the format name and version number.-->
 	<xsl:template name="aip-unique-formats">
-        <xsl:for-each-group select="//track[@type='General']/Format" group-by="concat(., ../../track/Format_Version[not(.='0')])">
+        <xsl:for-each-group select="//track[@type='General']/Format" group-by="concat(., ../../track[@type='General']/Format_Version[not(.='0')])">
             <xsl:sort select="current-grouping-key()" />
             <xsl:apply-templates select="."/>
         </xsl:for-each-group>
 
-        <xsl:for-each-group select="//track[@type='General']/FileExtension[not(following-sibling::Format)]" group-by="concat(., ../../track/Format_Version)">
+        <xsl:for-each-group select="//track[@type='General']/FileExtension[not(following-sibling::Format)]" group-by="concat(., ../../track[@type='General']/Format_Version)">
         <xsl:sort select="current-grouping-key()" />
             <xsl:apply-templates select="."/>
         </xsl:for-each-group>
