@@ -137,7 +137,7 @@
 	<xsl:template name="mediainfo-extension-note">
         <premis:formatNote>
             <xsl:text>Unable to identify format. Instead, file extension identified by MediaInfo version </xsl:text>
-            <xsl:value-of select="/MediaInfo/creatingLibrary/@version"/>
+            <xsl:value-of select="/MediaInfo/@version"/>
             <xsl:text>.</xsl:text>
         </premis:formatNote>
 	</xsl:template>
