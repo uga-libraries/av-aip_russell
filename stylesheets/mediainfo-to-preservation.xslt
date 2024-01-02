@@ -55,9 +55,11 @@
 
     <!-- Collection ID is the start of the AIP ID.-->
     <xsl:variable name="collection-id">
-		<!-- Hargrett oral history identifier format: har-, ua, 2 numbers followed by a dash, 3 numbers followed by an underscore, 4 numbers.-->
+		<!-- Hargrett oral history identifier formats:
+		har-, ua, 2 numbers followed by a dash, 3 numbers followed by an underscore, 4 numbers OR
+		har-, ms, 4 numbers. Both will be followed by an underscore in the aip-id.-->
 		<xsl:if test="$department='hargrett'">
-			<xsl:analyze-string select="$aip-id" regex="^(har-ua[0-9]{{2}}-[0-9]{{3}})">
+			<xsl:analyze-string select="$aip-id" regex="^(har-(ms|ua)[0-9-]+)_">
 				<xsl:matching-substring>
                 	<xsl:value-of select="regex-group(1)"/>
             	</xsl:matching-substring>
