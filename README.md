@@ -42,7 +42,8 @@ The AIPs directory should be in a bag, since files are transferred over the netw
 
 ![Screenshot of Hargrett AIPs Directory](https://github.com/uga-libraries/av-aip_russell/blob/main/hargrett-aips-directory.png?raw=true)
 
-Hargrett oral history AIP IDs are formatted har-ua##-###_####, for example har-ua12-003_0001
+Hargrett university archives oral history AIP IDs are formatted har-ua##-###\_####, for example har-ua12-003\_0001  
+Hargrett manuscript oral history AIP IDs are formatted har-ms####\_####, for example har-ms4900\_0001
 
 Hargrett title naming conventions are:
    * Firstname Lastname Interview Recording (for media AIPs)
