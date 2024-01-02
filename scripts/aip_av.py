@@ -101,13 +101,24 @@ def aip_metadata(aip_folder_name):
     # Then makes the AIP ID by adding the type (metadata or media) to the identifier.
     # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
     if department == "hargrett":
-        try:
-            regex = re.match('(har-ua[0-9]{2}-[0-9]{3}_[0-9]{4})_(.*)', aip_folder_name)
-            aip_id = f'{regex.group(1)}_{aip_type}'
-            title = regex.group(2)
-        except AttributeError:
-            move_error("aip_folder_name", aip_folder_name)
-            raise AttributeError
+        # Hargrett Manuscript ID pattern.
+        if aip_folder_name.startswith('har-ms'):
+            try:
+                regex = re.match('(har-ms[0-9]{4}_[0-9]{4})_(.*)', aip_folder_name)
+                aip_id = f'{regex.group(1)}_{aip_type}'
+                title = regex.group(2)
+            except AttributeError:
+                move_error("aip_folder_name", aip_folder_name)
+                raise AttributeError
+        # Hargrett University Archives ID pattern.
+        else:
+            try:
+                regex = re.match('(har-ua[0-9]{2}-[0-9]{3}_[0-9]{4})_(.*)', aip_folder_name)
+                aip_id = f'{regex.group(1)}_{aip_type}'
+                title = regex.group(2)
+            except AttributeError:
+                move_error("aip_folder_name", aip_folder_name)
+                raise AttributeError
 
     # For Russell, the title is the AIP folder, which is formatted identifier_lastname.
     # Then makes the AIP ID by getting the identifier from the AIP folder and adding the type (metadata or media).
