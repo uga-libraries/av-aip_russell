@@ -380,18 +380,14 @@ for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
 # Makes a log file, with a header row, in the AIPs directory.
 log("AIP Folder", "Status")
 
-# For one AIP at a time, runs the functions for all of the workflow steps. If a known error occurs, the AIP is moved to
-# a folder with the error name and the rest of the steps are not completed for that AIP. Checks if the AIP is still
-# present before running each function in case it was moved due to an error in the previous function.
-for aip_folder in os.listdir(aips_directory):
-
-    # Skips folders for script outputs, the log file, and .DS_Store (temp file on Macs).
-    if aip_folder in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest', 'log.csv', '.DS_Store']:
-        continue
+# For one AIP at a time (based on the rows in the metadata csv), runs the functions for all workflow steps.
+# If a known error occurs, the AIP is moved to a folder with the error name and the next AIP is started.
+# Checks if the AIP is still present before running each function in case it was moved due to a previous error.
+for aip_row in aip_metadata_df.itertuples():
 
     # Updates the current AIP number and displays the script progress.
     current_aip += 1
-    print(f'\n>>>Processing {aip_folder} ({current_aip} of {total_aips}).')
+    print(f'\n>>>Processing {aip_row.Folder} ({current_aip} of {total_aips}).')
 
     # Deletes undesired files based on the file extension.
     if aip_folder in os.listdir('.'):
