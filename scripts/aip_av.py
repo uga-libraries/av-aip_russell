@@ -24,7 +24,7 @@ Script steps:
 The script also generates a log of the AIPs processed and their final status, either an anticipated error or "complete".
 """
 
-# Script usage: python3 'path/aip_av.py' 'path/aips-directory'
+# Script usage: python3 'path/aip_av.py' 'path/aips_directory'
 
 import csv
 import datetime
@@ -56,6 +56,34 @@ def move_error(error_name, aip):
 
     # Adds the error to a log in the AIPs directory.
     log(aip, error_name)
+
+
+def check_argument(argument_list):
+    """Verify the script argument aips_directory is present and a valid directory
+
+    Parameters:
+        argument_list: sys.argv list of script arguments
+
+    Returns:
+        aips_dir: the path to the folder which contains the folders to be made into AIPs
+        error: a string with the error message or None if there were no errors
+    """
+
+    error = None
+    aips_dir = None
+
+    # Checks if the required argument (aips_directory) is present.
+    # If it is not present, the argument_list will have the script name (len of 1).
+    if len(argument_list) > 1:
+        # Checks if the provided argument is a valid directory.
+        if os.path.exists(argument_list[1]):
+            aips_dir = argument_list[1]
+        else:
+            error = f"AIPs directory argument '{argument_list[1]}' is not a valid directory."
+    else:
+        error = "Required AIPs directory argument is missing."
+
+    return aips_dir, error
 
 
 def delete_files(aip_folder_name):
@@ -250,24 +278,16 @@ def package(aip):
     log(aip_folder, "Complete")
 
 
-# Gets the AIPs directory from the script argument.
-# The AIPs directory contains all the folders to be made into AIPs.
-# Prints an error message and ends the script if the argument is missing.
-try:
-    aips_directory = sys.argv[1]
-except IndexError:
-    print('\nThe AIPs directory is missing and is a required argument.')
-    print("To run the script: python3 'path/aip_av.py' 'path/aips-directory'")
-    exit()
+# Verifies the required script argument (aips_directory) is correct.
+# If there are any errors, exits the script.
+aips_directory, error_message = check_argument(sys.argv)
+if error_message:
+    print(error_message)
+    print("To run the script: python3 'path/aip_av.py' 'path/aips_directory'")
+    sys.exit()
 
 # Changes the current directory to the AIPs directory.
-# Prints an error message and ends the script if the directory doesn't exist or is a file instead of a directory.
-try:
-    os.chdir(aips_directory)
-except (FileNotFoundError, NotADirectoryError):
-    print(f'\nThe provided AIPs directory "{aips_directory}" is not a valid directory.')
-    print("To run the script: python3 'path/aip_av.py' 'path/aips-directory'")
-    exit()
+os.chdir(aips_directory)
 
 # Starts counts for tracking the script progress.
 total_aips = len(os.listdir(aips_directory))
