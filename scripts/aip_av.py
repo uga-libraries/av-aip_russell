@@ -217,16 +217,16 @@ def mediainfo(aip):
         shutil.copy2(f'{aip}/metadata/{aip}_mediainfo.xml', 'mediainfo-xml')
 
 
-def preservation_xml(aip, department, aip_title):
+def preservation_xml(aip_md):
     """Creates PREMIS and Dublin Core metadata from the MediaInfo XML and saves it as a preservation.xml file."""
 
     # Paths to files used in the saxon command.
-    media_xml = f'{aip}/metadata/{aip}_mediainfo.xml'
+    media_xml = f'{aip_md.AIP_ID}/metadata/{aip_md.AIP_ID}_mediainfo.xml'
     xslt = f'{STYLESHEETS}/mediainfo-to-preservation.xslt'
-    pres_xml = f'{aip}/metadata/{aip}_preservation.xml'
+    pres_xml = f'{aip_md.AIP_ID}/metadata/{aip_md.AIP_ID}_preservation.xml'
 
     # Arguments to add to the saxon command.
-    args = f'aip-id={aip} department={department} title="{aip_title}" namespace={NAMESPACE}'
+    args = f'aip-id={aip_md.AIP_ID} department={aip_md.Department} title="{aip_md.Title}" namespace={NAMESPACE}'
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
@@ -234,7 +234,7 @@ def preservation_xml(aip, department, aip_title):
         subprocess.run(f'java -cp "{SAXON}" net.sf.saxon.Transform -s:"{media_xml}" -xsl:"{xslt}" -o:"{pres_xml}" {args}',
                        shell=True)
     else:
-        move_error('no_mediainfo_xml', aip)
+        move_error('no_mediainfo_xml', aip_md.AIP_ID)
         return
 
     # Validates the preservation.xml against the requirements of the Libraries' digital preservation system (ARCHive).
@@ -248,8 +248,8 @@ def preservation_xml(aip, department, aip_title):
     # document in the error folder. If the preservation.xml is valid, copies the preservation.xml to another folder for
     # staff use.
     if 'failed to load' in str(validate) or 'fails to validate' in str(validate):
-        move_error('preservation_invalid', aip)
-        with open(f'errors/preservation_invalid/{aip}_preservationxml_validation_error.txt', 'a') as error:
+        move_error('preservation_invalid', aip_md.AIP_ID)
+        with open(f'errors/preservation_invalid/{aip_md.AIP_ID}_preservationxml_validation_error.txt', 'a') as error:
             lines = str(validate.stderr).split('\\n')
             for line in lines:
                 error.write(f'{line}\n\n')
@@ -353,7 +353,7 @@ for aip_row in aip_metadata_df.itertuples():
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
     if aip_row.AIP_ID in os.listdir('.'):
-        preservation_xml(aip_row.AIP_ID, aip_row.Department, aip_row.Title)
+        preservation_xml(aip_row)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_row.AIP_ID in os.listdir('.'):
