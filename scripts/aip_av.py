@@ -98,15 +98,15 @@ def metadata_csv(aips_dir):
     """
 
     metadata = None
-    error = None
+    error_list = []
 
     # If the metadata.csv is not in the aips_directory, returns an error.
     csv_path = os.path.join(aips_dir, 'metadata.csv')
     if not os.path.exists(csv_path):
-        error = "Missing the required file 'metadata.csv' in the AIPS directory."
-        return metadata, error
+        error_list.append("Missing the required file 'metadata.csv' in the AIPS directory.")
+        return metadata, error_list
 
-    return metadata, error
+    return metadata, error_list
 
 
 def delete_files(aip_folder_name):
@@ -314,9 +314,11 @@ os.chdir(aips_directory)
 
 # Reads the metadata.csv (must be in the aips_directory) and verifies it has the expected content.
 # If there are any errors, exits the script.
-aip_metadata, error_message = metadata_csv(aips_directory)
-if error_message:
-    print(error_message)
+aip_metadata, errors = metadata_csv(aips_directory)
+if len(errors) > 0:
+    print("Problem with the metadata.csv. Correct the following error(s) and run the script again.")
+    for error in errors:
+        print('  *', error)
     sys.exit()
 
 # Starts counts for tracking the script progress.
