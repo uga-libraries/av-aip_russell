@@ -30,7 +30,6 @@ import csv
 import datetime
 import os
 import pandas as pd
-import re
 import shutil
 import subprocess
 import sys
@@ -170,56 +169,6 @@ def delete_files(aip_folder_name):
     # If deleting the unwanted files left the AIP folder empty, moves the AIP to an error folder.
     if len(os.listdir(aip_folder_name)) == 0:
         move_error("all_files_deleted", aip_folder_name)
-
-
-# def aip_metadata(aip_folder_name):
-#     """Returns the department, AIP ID, and title based on the AIP folder name and file formats.
-#     If any values cannot be calculated, raises an error."""
-#
-#     # Determines the AIP type (metadata or media) based on the file extension of the first digital object.
-#     # KNOWN ISSUE: assumes the folder only contains metadata or media files, not both.
-#     # Using a lowercase version of filename so the match isn't case sensitive.
-#     first_file = os.listdir(aip_folder_name)[0]
-#     if first_file.lower().endswith('.pdf') or first_file.lower().endswith('.xml'):
-#         aip_type = 'metadata'
-#     else:
-#         aip_type = 'media'
-#
-#     # Determines the department based on the start of the AIP folder name.
-#     # If it does not start with an expected value, raises an error so processing can stop on this AIP.
-#     if aip_folder_name.startswith('har'):
-#         department = 'hargrett'
-#     elif aip_folder_name.startswith('rbrl'):
-#         department = 'russell'
-#     else:
-#         move_error('department_unknown', aip_folder_name)
-#         raise ValueError
-#
-#     # For Hargrett, gets the identifier and title from the AIP folder name, which is formatted identifier_Title.
-#     # Then makes the AIP ID by adding the type (metadata or media) to the identifier.
-#     # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
-#     if department == "hargrett":
-#         try:
-#             regex = re.match('(har-ua[0-9]{2}-[0-9]{3}_[0-9]{4})_(.*)', aip_folder_name)
-#             aip_id = f'{regex.group(1)}_{aip_type}'
-#             title = regex.group(2)
-#         except AttributeError:
-#             move_error("aip_folder_name", aip_folder_name)
-#             raise AttributeError
-#
-#     # For Russell, the title is the AIP folder, which is formatted identifier_lastname.
-#     # Then makes the AIP ID by getting the identifier from the AIP folder and adding the type (metadata or media).
-#     # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
-#     else:
-#         try:
-#             regex = re.match('([a-z0-9-]+)_', aip_folder_name)
-#             aip_id = f'{regex.group(1)}_{aip_type}'
-#             title = aip_folder_name
-#         except AttributeError:
-#             move_error("aip_folder_name", aip_folder_name)
-#             raise AttributeError
-#
-#     return department, aip_id, title
 
 
 def aip_directory(aip_folder_name, aip):
