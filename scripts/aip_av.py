@@ -342,8 +342,8 @@ for aip_row in aip_metadata_df.itertuples():
     if aip_row.Folder in os.listdir('.'):
         delete_files(aip_row.Folder)
 
-    # Organizes the AIP folder contents into the AIP directory structure.
-    # After this step, the AIP folder is renamed to be the AIP ID.
+    # Organizes the AIP folder contents into the AIP directory structure
+    # and renames the AIP folder to the AIP ID.
     if aip_row.Folder in os.listdir('.'):
         aip_directory(aip_row.Folder, aip_row.AIP_ID)
 
