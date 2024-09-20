@@ -257,7 +257,7 @@ def preservation_xml(aip, department, aip_title):
         shutil.copy2(pres_xml, 'preservation-xml')
 
 
-def package(aip):
+def package(aip, aip_folder):
     """Bags, tars, and zips the AIP. Renames the AIP folder to AIPID_bag."""
 
     # Deletes any .DS_Store files because they cause errors with bag validation. They would have been deleted by
@@ -357,7 +357,7 @@ for aip_row in aip_metadata_df.itertuples():
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_row.AIP_ID in os.listdir('.'):
-        package(aip_row.AIP_ID)
+        package(aip_row.AIP_ID, aip_row.Folder)
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5sum.
 # The manifest has one line per AIP, formatted md5<tab>filename
