@@ -131,6 +131,22 @@ def metadata_csv(aips_dir):
         for aip_folder in dup_folder_df['Folder'].unique().tolist():
             error_list.append(f"{aip_folder} is in metadata.csv more than once.")
 
+    # Makes a dataframe of folders in the aips_directory (current directory), for comparing to the metadata.csv.
+    aips_dir_list = []
+    for item in os.listdir('.'):
+        if not item == 'metadata.csv':
+            aips_dir_list.append(item)
+    aips_dir_df = pd.DataFrame(aips_dir_list, columns=['Folder_Dir'])
+
+    # Checks the folders in the aips_directory match the folders in metadata.csv.
+    compare_df = metadata_df.merge(aips_dir_df, left_on='Folder', right_on='Folder_Dir', how='outer', indicator=True)
+    csv_only = compare_df[compare_df['_merge'] == 'left_only']['Folder'].unique().tolist()
+    if len(csv_only) > 0:
+        error_list.append(f"Folder(s) in metadata.csv and not the aips_directory: {'; '.join(csv_only)}.")
+    dir_only = compare_df[compare_df['_merge'] == 'right_only']['Folder_Dir'].tolist()
+    if len(dir_only) > 0:
+        error_list.append(f"Folder(s) in aips_directory and not in the metadata.csv: {'; '.join(dir_only)}.")
+
     return metadata_df, error_list
 
 
