@@ -390,32 +390,25 @@ for aip_row in aip_metadata_df.itertuples():
     print(f'\n>>>Processing {aip_row.Folder} ({current_aip} of {total_aips}).')
 
     # Deletes undesired files based on the file extension.
-    if aip_folder in os.listdir('.'):
-        delete_files(aip_folder)
-
-    # Determines the department, AIP ID, AIP title from the AIP folder name and file formats.
-    if aip_folder in os.listdir('.'):
-        try:
-            department, aip_id, title = aip_metadata(aip_folder)
-        except (ValueError, AttributeError):
-            continue
+    if aip_row.Folder in os.listdir('.'):
+        delete_files(aip_row.Folder)
 
     # Organizes the AIP folder contents into the AIP directory structure.
     # After this step, the AIP folder is renamed to be the AIP ID.
-    if aip_folder in os.listdir('.'):
-        aip_directory(aip_folder, aip_id)
+    if aip_row.Folder in os.listdir('.'):
+        aip_directory(aip_row.Folder, aip_row.AIP_ID)
 
     # Extracts technical metadata from the files using MediaInfo.
-    if aip_id in os.listdir('.'):
-        mediainfo(aip_id)
+    if aip_row.AIP_ID in os.listdir('.'):
+        mediainfo(aip_row.AIP_ID)
 
     # Transforms the MediaInfo XML into the PREMIS preservation.xml file.
-    if aip_id in os.listdir('.'):
-        preservation_xml(aip_id, department, title)
+    if aip_row.AIP_ID in os.listdir('.'):
+        preservation_xml(aip_row.AIP_ID, aip_row.Department, aip_row.Title)
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
-    if aip_id in os.listdir('.'):
-        package(aip_id)
+    if aip_row.AIP_ID in os.listdir('.'):
+        package(aip_row.AIP_ID)
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5sum.
 # The manifest has one line per AIP, formatted md5<tab>filename
