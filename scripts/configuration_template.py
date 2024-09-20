@@ -15,3 +15,6 @@ PREPARE_BAG = 'C:/INSERT-PATH/prepare_bag'
 
 # Namespace for AIP identifiers. For UGA, this is the URI for ARCHive.
 NAMESPACE = 'INSERT-NAMESPACE'
+
+# Groups in ARCHive for verifying departments.
+GROUPS = ['Group1', 'Group2']
