@@ -29,6 +29,7 @@ The script also generates a log of the AIPs processed and their final status, ei
 import csv
 import datetime
 import os
+import pandas as pd
 import re
 import shutil
 import subprocess
@@ -93,24 +94,32 @@ def metadata_csv(aips_dir):
         aips_dir: the path to aips_directory (script argument)
 
     Returns:
-        metadata: the values from reading metadata.csv or None if there was an error
+        metadata_df: a pandas dataframe with the values from reading metadata.csv or None if there was an error
         error: a string with the error message or None if there were no errors
     """
 
-    metadata = None
+    # List for all errors encountered, since there may be more than one.
     error_list = []
 
     # If the metadata.csv is not in the aips_directory, returns an error.
     csv_path = os.path.join(aips_dir, 'metadata.csv')
     if not os.path.exists(csv_path):
         error_list.append("Missing the required file 'metadata.csv' in the AIPS directory.")
-        return metadata, error_list
+        return None, error_list
 
-    # Reads the metadata.csv and verifies it has the expected values.
-    with open(csv_path) as open_csv:
-        read_csv = csv.reader(open_csv)
+    # Reads the metadata.csv into a pandas dataframe.
+    metadata_df = pd.read_csv(csv_path)
 
-    return metadata, error_list
+    # Checks the column names are correct.
+    # If not, returns the error without checking column contents, since the correct column cannot be found.
+    expected_columns = ['Department', 'Collection', 'Folder', 'AIP_ID', 'Title', 'Version']
+    if not metadata_df.columns.to_list() == expected_columns:
+        error_list.append(f"The columns in the metadata.csv do not match the required values and/or order."
+                          f"\n  Required: {', '.join(expected_columns)}"
+                          f"\n  Current: {', '.join(metadata_df.columns.to_list())}")
+        return None, error_list
+
+    return metadata_df, error_list
 
 
 def delete_files(aip_folder_name):
@@ -322,7 +331,7 @@ aip_metadata, errors = metadata_csv(aips_directory)
 if len(errors) > 0:
     print("Problem with the metadata.csv. Correct the following error(s) and run the script again.")
     for error in errors:
-        print('  *', error)
+        print('\n*', error)
     sys.exit()
 
 # Starts counts for tracking the script progress.
