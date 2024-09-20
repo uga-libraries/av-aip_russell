@@ -86,6 +86,29 @@ def check_argument(argument_list):
     return aips_dir, error
 
 
+def metadata_csv(aips_dir):
+    """Verify the metadata.csv is in aips_directory and has correct values
+
+    Parameters:
+        aips_dir: the path to aips_directory (script argument)
+
+    Returns:
+        metadata: the values from reading metadata.csv or None if there was an error
+        error: a string with the error message or None if there were no errors
+    """
+
+    metadata = None
+    error = None
+
+    # If the metadata.csv is not in the aips_directory, returns an error.
+    csv_path = os.path.join(aips_dir, 'metadata.csv')
+    if not os.path.exists(csv_path):
+        error = "Missing the required file 'metadata.csv' in the AIPS directory."
+        return metadata, error
+
+    return metadata, error
+
+
 def delete_files(aip_folder_name):
     """Deletes unwanted files based on their file extension."""
 
@@ -102,54 +125,54 @@ def delete_files(aip_folder_name):
         move_error("all_files_deleted", aip_folder_name)
 
 
-def aip_metadata(aip_folder_name):
-    """Returns the department, AIP ID, and title based on the AIP folder name and file formats.
-    If any values cannot be calculated, raises an error."""
-
-    # Determines the AIP type (metadata or media) based on the file extension of the first digital object.
-    # KNOWN ISSUE: assumes the folder only contains metadata or media files, not both.
-    # Using a lowercase version of filename so the match isn't case sensitive.
-    first_file = os.listdir(aip_folder_name)[0]
-    if first_file.lower().endswith('.pdf') or first_file.lower().endswith('.xml'):
-        aip_type = 'metadata'
-    else:
-        aip_type = 'media'
-
-    # Determines the department based on the start of the AIP folder name.
-    # If it does not start with an expected value, raises an error so processing can stop on this AIP.
-    if aip_folder_name.startswith('har'):
-        department = 'hargrett'
-    elif aip_folder_name.startswith('rbrl'):
-        department = 'russell'
-    else:
-        move_error('department_unknown', aip_folder_name)
-        raise ValueError
-
-    # For Hargrett, gets the identifier and title from the AIP folder name, which is formatted identifier_Title.
-    # Then makes the AIP ID by adding the type (metadata or media) to the identifier.
-    # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
-    if department == "hargrett":
-        try:
-            regex = re.match('(har-ua[0-9]{2}-[0-9]{3}_[0-9]{4})_(.*)', aip_folder_name)
-            aip_id = f'{regex.group(1)}_{aip_type}'
-            title = regex.group(2)
-        except AttributeError:
-            move_error("aip_folder_name", aip_folder_name)
-            raise AttributeError
-
-    # For Russell, the title is the AIP folder, which is formatted identifier_lastname.
-    # Then makes the AIP ID by getting the identifier from the AIP folder and adding the type (metadata or media).
-    # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
-    else:
-        try:
-            regex = re.match('([a-z0-9-]+)_', aip_folder_name)
-            aip_id = f'{regex.group(1)}_{aip_type}'
-            title = aip_folder_name
-        except AttributeError:
-            move_error("aip_folder_name", aip_folder_name)
-            raise AttributeError
-
-    return department, aip_id, title
+# def aip_metadata(aip_folder_name):
+#     """Returns the department, AIP ID, and title based on the AIP folder name and file formats.
+#     If any values cannot be calculated, raises an error."""
+#
+#     # Determines the AIP type (metadata or media) based on the file extension of the first digital object.
+#     # KNOWN ISSUE: assumes the folder only contains metadata or media files, not both.
+#     # Using a lowercase version of filename so the match isn't case sensitive.
+#     first_file = os.listdir(aip_folder_name)[0]
+#     if first_file.lower().endswith('.pdf') or first_file.lower().endswith('.xml'):
+#         aip_type = 'metadata'
+#     else:
+#         aip_type = 'media'
+#
+#     # Determines the department based on the start of the AIP folder name.
+#     # If it does not start with an expected value, raises an error so processing can stop on this AIP.
+#     if aip_folder_name.startswith('har'):
+#         department = 'hargrett'
+#     elif aip_folder_name.startswith('rbrl'):
+#         department = 'russell'
+#     else:
+#         move_error('department_unknown', aip_folder_name)
+#         raise ValueError
+#
+#     # For Hargrett, gets the identifier and title from the AIP folder name, which is formatted identifier_Title.
+#     # Then makes the AIP ID by adding the type (metadata or media) to the identifier.
+#     # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
+#     if department == "hargrett":
+#         try:
+#             regex = re.match('(har-ua[0-9]{2}-[0-9]{3}_[0-9]{4})_(.*)', aip_folder_name)
+#             aip_id = f'{regex.group(1)}_{aip_type}'
+#             title = regex.group(2)
+#         except AttributeError:
+#             move_error("aip_folder_name", aip_folder_name)
+#             raise AttributeError
+#
+#     # For Russell, the title is the AIP folder, which is formatted identifier_lastname.
+#     # Then makes the AIP ID by getting the identifier from the AIP folder and adding the type (metadata or media).
+#     # If the AIP folder cannot be parsed, raises an error so processing can stop on this AIP.
+#     else:
+#         try:
+#             regex = re.match('([a-z0-9-]+)_', aip_folder_name)
+#             aip_id = f'{regex.group(1)}_{aip_type}'
+#             title = aip_folder_name
+#         except AttributeError:
+#             move_error("aip_folder_name", aip_folder_name)
+#             raise AttributeError
+#
+#     return department, aip_id, title
 
 
 def aip_directory(aip_folder_name, aip):
@@ -288,6 +311,13 @@ if error_message:
 
 # Changes the current directory to the AIPs directory.
 os.chdir(aips_directory)
+
+# Reads the metadata.csv (must be in the aips_directory) and verifies it has the expected content.
+# If there are any errors, exits the script.
+aip_metadata, error_message = metadata_csv(aips_directory)
+if error_message:
+    print(error_message)
+    sys.exit()
 
 # Starts counts for tracking the script progress.
 total_aips = len(os.listdir(aips_directory))
