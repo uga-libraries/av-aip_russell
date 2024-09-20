@@ -106,6 +106,10 @@ def metadata_csv(aips_dir):
         error_list.append("Missing the required file 'metadata.csv' in the AIPS directory.")
         return metadata, error_list
 
+    # Reads the metadata.csv and verifies it has the expected values.
+    with open(csv_path) as open_csv:
+        read_csv = csv.reader(open_csv)
+
     return metadata, error_list
 
 
