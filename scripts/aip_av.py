@@ -121,15 +121,19 @@ def metadata_csv(aips_dir):
 
     # Checks the columns match ARCHive, based on a list in configuration.py
     departments = metadata_df['Department'].unique()
+    dept_error = []
     for department in departments:
         if department not in GROUPS:
-            error_list.append(f"'{department}' is not an ARCHive group.")
+            dept_error.append(department)
+    error_list.append(f"Department(s) not in ARCHive group list: {'; '.join(dept_error)}.")
 
     # Checks that no AIP (based on Folder column) is in metadata.csv more than once.
     dup_folder_df = metadata_df[metadata_df.duplicated('Folder')]
+    dup_error = []
     if not dup_folder_df.empty:
         for aip_folder in dup_folder_df['Folder'].unique().tolist():
-            error_list.append(f"{aip_folder} is in metadata.csv more than once.")
+            dup_error.append(aip_folder)
+    error_list.append(f"Folder(s) in metadata.csv more than once: {'; '.join(dup_error)}.")
 
     # Makes a dataframe of folders in the aips_directory (current directory), for comparing to the metadata.csv.
     aips_dir_list = []
