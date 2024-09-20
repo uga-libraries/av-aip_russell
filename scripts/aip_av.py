@@ -125,6 +125,12 @@ def metadata_csv(aips_dir):
         if department not in GROUPS:
             error_list.append(f"'{department}' is not an ARCHive group.")
 
+    # Checks that no AIP (based on Folder column) is in metadata.csv more than once.
+    dup_folder_df = metadata_df[metadata_df.duplicated('Folder')]
+    if not dup_folder_df.empty:
+        for aip_folder in dup_folder_df['Folder'].unique().tolist():
+            error_list.append(f"{aip_folder} is in metadata.csv more than once.")
+
     return metadata_df, error_list
 
 
