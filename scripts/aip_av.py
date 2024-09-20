@@ -119,6 +119,12 @@ def metadata_csv(aips_dir):
                           f"\n  Current: {', '.join(metadata_df.columns.to_list())}")
         return None, error_list
 
+    # Checks the columns match ARCHive, based on a list in configuration.py
+    departments = metadata_df['Department'].unique()
+    for department in departments:
+        if department not in GROUPS:
+            error_list.append(f"'{department}' is not an ARCHive group.")
+
     return metadata_df, error_list
 
 
