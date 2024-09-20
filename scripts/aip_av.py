@@ -125,7 +125,8 @@ def metadata_csv(aips_dir):
     for department in departments:
         if department not in GROUPS:
             dept_error.append(department)
-    error_list.append(f"Department(s) not in ARCHive group list: {'; '.join(dept_error)}.")
+    if len(dept_error) > 0:
+        error_list.append(f"Department(s) not in ARCHive group list: {'; '.join(dept_error)}.")
 
     # Checks that no AIP (based on Folder column) is in metadata.csv more than once.
     dup_folder_df = metadata_df[metadata_df.duplicated('Folder')]
@@ -133,7 +134,8 @@ def metadata_csv(aips_dir):
     if not dup_folder_df.empty:
         for aip_folder in dup_folder_df['Folder'].unique().tolist():
             dup_error.append(aip_folder)
-    error_list.append(f"Folder(s) in metadata.csv more than once: {'; '.join(dup_error)}.")
+    if len(dup_error) > 0:
+        error_list.append(f"Folder(s) in metadata.csv more than once: {'; '.join(dup_error)}.")
 
     # Makes a dataframe of folders in the aips_directory (current directory), for comparing to the metadata.csv.
     aips_dir_list = []
@@ -357,9 +359,9 @@ if error_message:
 # Changes the current directory to the AIPs directory.
 os.chdir(aips_directory)
 
-# Reads the metadata.csv (must be in the aips_directory) and verifies it has the expected content.
-# If there are any errors, exits the script.
-aip_metadata, errors = metadata_csv(aips_directory)
+# Reads the metadata.csv (must be in the aips_directory) into a pandas dataframe
+# and verifies it has the expected content. If there are any errors, exits the script.
+aip_metadata_df, errors = metadata_csv(aips_directory)
 if len(errors) > 0:
     print("Problem with the metadata.csv. Correct the following error(s) and run the script again.")
     for error in errors:
@@ -367,7 +369,7 @@ if len(errors) > 0:
     sys.exit()
 
 # Starts counts for tracking the script progress.
-total_aips = len(os.listdir(aips_directory))
+total_aips = len(aip_metadata_df.index)
 current_aip = 0
 
 # Makes folders for the script outputs in the AIPs directory, if they don't already exist.
