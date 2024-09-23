@@ -8,7 +8,7 @@ The Brown Media Archives has their own [workflow for audiovisual materials](http
 which has specialized rules for the different formats they use. 
 UGA Libraries also has a [general workflow for mixed formats](https://github.com/uga-libraries/general-aip) and a [specialized workflow for web archives](https://github.com/uga-libraries/web-aip).
 
-The UGA Libraries has two types of AV AIPs: media and  metadata. 
+The UGA Libraries has two types of AV AIPs: media and metadata. 
 The only difference is media AIPs contain the AV files 
 and metadata AIPs contain supporting documentation such as OHMS XML, transcripts, and releases. 
 The media and metadata are kept in two separate AIPs so that the media, which is generally ready for preservation first, 
@@ -20,7 +20,11 @@ which is not a good use of our preservation storage space.
 As of August 2021, this script also works for creating Hargrett oral history AIPs.
 
 ## Script approach
-The script iterates over each folder to be made into an AIP, completing all steps for one folder before starting the next. 
+Metadata (department, collection id, AIP id, title, and version) are given to the script via a CSV.
+Previously, this information was parsed from the folder name, 
+which was prone to breaking due to new id naming conventions.
+
+The script completes all steps for a single AIP before starting the next. 
 If a known error is encountered, such as failing a validation test, the folder is moved to an error folder, 
 and the rest of the steps are skipped for that folder.
 
@@ -45,8 +49,6 @@ See "Script Input" (below) for details on the AIPs directory.
 
 ## Installation
 1. Install the dependencies (listed above). Saxon may come with your OS.
-
-
 2. Download this repository and save to your computer.
 3. Use the configuration_template.py to make a file named configuration.py with file path variables for your local machine.
 4. Change permissions on the scripts so they are executable.
@@ -55,9 +57,21 @@ See "Script Input" (below) for details on the AIPs directory.
 The content to be transformed into AIPs must be in a single folder, which is the AIPs directory. 
 Within the AIPs directory, there is one folder for each AIP. Each folder must be only media or only metadata files.
 
+### Metadata file
+Create a file named metadata.csv in the AIPs directory, following this [example metadata.csv](scripts/metadata.csv).
+This contains required information about each of the AIPs to be included in this batch.
+
+- Department: ARCHive group name
+- Collection: collection identifier
+- Folder: the current name of the folder to be turned into an AIP
+- AIP_ID: AIP identifier
+- Title: AIP title
+- Version: AIP version number, which must be a whole number
+
 ### Hargrett script input
 The AIPs directory should be in a bag, since files are transferred over the network before they are transformed into AIPs. 
-The AIP folders are named AIPID_Title. Example AIPs directory:
+The AIP folders were previously named AIPID_Title, although they can be named anything now that metadata.csv is implemented. 
+Example AIPs directory:
 
 ![Screenshot of Hargrett AIPs Directory](https://github.com/uga-libraries/av-aip_russell/blob/main/hargrett-aips-directory.png?raw=true)
 
@@ -73,26 +87,32 @@ prior to running this script.
 ### Russell script input
 Russell AIP folders should be named with the AIP title. 
 The naming convention is identifier_lastname where the identifier is the AIP ID without the type (media or metadata) suffix.
+The naming convention is not required for the script now that metadata.csv is implemented.
 
 ## Workflow Details
 
 See also the [graphical representation of this workflow](https://github.com/uga-libraries/av-aip_russell/blob/main/Russell%20AV%20Preservation%20Script%20Flow%20Diagram.png).
 
 1. Deletes files that do not have any of the expected file extensions (.dv, .m4a, .mov, .mp3, .mp4, .wav, .pdf, or .xml) from the AIP folder.
+2. Verifies the metadata.csv is in the AIPs directory and is correct; reads the metadata.csv.
+3. Makes folders for script outputs within the AIPs directory.
 
-
-2. Determines the department, AIP ID, and AIP title from the AIP folder name and file formats.
-3. Structures the AIP folder contents:
+For each AIP:
+4. Deletes unwanted file types based on the file extension.
+5. Organizes the folder into the AIP directory structure:
     1. Makes a folder named objects and moves all files and folders into it.
     2. Makes a folder named metadata for script outputs.
     3. Renames the AIP folder to the AIP ID.
-4. Runs MediaInfo on the objects folder and saves the result in the metadata folder.
-5. Transforms the MediaInfo xml into the preservation.xml (PREMIS technical metadata) file using saxon and xslt.
-6. Validates the preservation.xml with xmllint and xsd's.
-7. Bags the AIP in place with md5 and sha256 manifests using bagit.py.
-8. Validates the bags using bagit.py.
-9. Runs the perl script prepare_bag on the AIP to tar and zip it and saves output to aips-ready-to-ingest.
-10. When all AIPs are processed, makes a md5 manifest of the packaged AIPs in the aips-to-ingest folder using md5sum.
+6. Extracts technical metadata using MediaInfo and saves the result in the metadata folder.
+7. Converts technical metadata to Dublin Core and PREMIS (preservation.xml)
+   1. Makes the preservation.xml with saxon and xslt.
+   2. Validates the preservation.xml with xmllint and xsd.
+8. Packages the AIP
+   1. Deletes .DS_Store that have been auto-generated while the script is running.
+   2. Bags the AIP in place with md5 and sha256 manifests with bagit.py.
+   3. Validates the bag with bagit.py.
+   4. Runs the perl script prepare_bag on the AIP to tar and zip it and saves output to aips-ready-to-ingest. 
+9. When all AIPs are processed, makes a md5 manifest of the packaged AIPs in the aips-to-ingest folder using md5sum.
 
 ## Initial Author
 Adriane Hanson, Head of Digital Stewardship, January 2020
