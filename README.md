@@ -1,18 +1,35 @@
 # Russell Library Workflow for AV AIPs
 
 ## Purpose and overview
-This is the workflow to make archival information packages (AIPs) for Russel Library digital audiovisual objects that are ready for ingest into the UGA Libraries' digital preservation system (ARCHive). The workflow organizes files, extracts and formats metadata, and packages the files. The Brown Media Archives has their own [workflow for audiovisual materials](https://github.com/uga-libraries/av-aip) which has specialized rules for the different formats they use. UGA Libraries also has a [general workflow for mixed formats](https://github.com/uga-libraries/general-aip) and a [specialized workflow for web archives](https://github.com/uga-libraries/web-aip).
+This is the workflow to make archival information packages (AIPs) for Russel Library digital audiovisual objects 
+that are ready for ingest into the UGA Libraries' digital preservation system (ARCHive). 
+The workflow organizes files, extracts and formats metadata, and packages the files. 
+The Brown Media Archives has their own [workflow for audiovisual materials](https://github.com/uga-libraries/av-aip) 
+which has specialized rules for the different formats they use. 
+UGA Libraries also has a [general workflow for mixed formats](https://github.com/uga-libraries/general-aip) and a [specialized workflow for web archives](https://github.com/uga-libraries/web-aip).
 
-The UGA Libraries has two types of AV AIPs: media and  metadata. The only difference is media AIPs contain the AV files and metadata AIPs contain supporting documentation such as OHMS XML, transcripts, and releases. The media and metadata are kept in two separate AIPs so that the media, which is generally ready for preservation first, can be ingested into ARCHive without delay. Once the metadata is created, it can be added to ARCHive as a separate AIP. If the media and metadata were in the same AIP, when the metadata was ready a new version of the AIP would have to be ingested into ARCHive that contained an identical copy of the media, which is not a good use of our preservation storage space.
+The UGA Libraries has two types of AV AIPs: media and  metadata. 
+The only difference is media AIPs contain the AV files 
+and metadata AIPs contain supporting documentation such as OHMS XML, transcripts, and releases. 
+The media and metadata are kept in two separate AIPs so that the media, which is generally ready for preservation first, 
+can be ingested into ARCHive without delay. Once the metadata is created, it can be added to ARCHive as a separate AIP. 
+If the media and metadata were in the same AIP, when the metadata was ready a new version of the AIP 
+would have to be ingested into ARCHive that contained an identical copy of the media, 
+which is not a good use of our preservation storage space.
 
 As of August 2021, this script also works for creating Hargrett oral history AIPs.
 
 ## Script approach
-The script iterates over each folder to be made into an AIP, completing all steps for one folder before starting the next. If a known error is encountered, such as failing a validation test, the folder is moved to an error folder, and the rest of the steps are skipped for that folder.
+The script iterates over each folder to be made into an AIP, completing all steps for one folder before starting the next. 
+If a known error is encountered, such as failing a validation test, the folder is moved to an error folder, 
+and the rest of the steps are skipped for that folder.
 
-Because this script can take some time to complete, particularly when tarring and zipping larger files, it prints to the terminal whenever it is starting a new AIP folder so staff can monitor the script's progress.
+Because this script can take some time to complete, particularly when tarring and zipping larger files, 
+it prints to the terminal whenever it is starting a new AIP folder so staff can monitor the script's progress.
 
-A log is created by the script with the name of each AIP folder and its final status, which is whether the AIP encountered a known error or if it completed, so staff can quickly review the result of a batch of AIPs.
+A log is created by the script with the name of each AIP folder and its final status, 
+which is whether the AIP encountered a known error or if it completed, 
+so staff can quickly review the result of a batch of AIPs.
 
 ## Script usage
 python3 'path/aip_av.py' 'path/aip-directory'
@@ -35,10 +52,12 @@ See "Script Input" (below) for details on the AIPs directory.
 4. Change permissions on the scripts so they are executable.
 
 ## Script Input (AIPS Directory)
-The content to be transformed into AIPs must be in a single folder, which is the AIPs directory. Within the AIPs directory, there is one folder for each AIP. Each folder must be only media or only metadata files.
+The content to be transformed into AIPs must be in a single folder, which is the AIPs directory. 
+Within the AIPs directory, there is one folder for each AIP. Each folder must be only media or only metadata files.
 
 ### Hargrett script input
-The AIPs directory should be in a bag, since files are transferred over the network before they are transformed into AIPs. The AIP folders are named AIPID_Title. Example AIPs directory:
+The AIPs directory should be in a bag, since files are transferred over the network before they are transformed into AIPs. 
+The AIP folders are named AIPID_Title. Example AIPs directory:
 
 ![Screenshot of Hargrett AIPs Directory](https://github.com/uga-libraries/av-aip_russell/blob/main/hargrett-aips-directory.png?raw=true)
 
@@ -48,10 +67,12 @@ Hargrett title naming conventions are:
    * Firstname Lastname Interview Recording (for media AIPs)
    * Firstname Lastname Interview Metadata (for metadata AIPs)
 
-Use the hargrett-preprocessing.py script to validate the AIPs directory bag and remove the AIP folders from the bag prior to running this script.
+Use the hargrett-preprocessing.py script to validate the AIPs directory bag and remove the AIP folders from the bag 
+prior to running this script.
 
 ### Russell script input
-Russell AIP folders should be named with the AIP title. The naming convention is identifier_lastname where the identifier is the AIP ID without the type (media or metadata) suffix.
+Russell AIP folders should be named with the AIP title. 
+The naming convention is identifier_lastname where the identifier is the AIP ID without the type (media or metadata) suffix.
 
 ## Workflow Details
 
@@ -77,4 +98,5 @@ See also the [graphical representation of this workflow](https://github.com/uga-
 Adriane Hanson, Head of Digital Stewardship, January 2020
 
 ## Acknowledgements
-These scripts were adapted from [bash scripts developed by Iva Dimitrova](https://github.com/uga-libraries/aip-mac-bash-mediainfo). These were used by the Russell Library for making AV AIPs from 2017 to 2019.
+These scripts were adapted from [bash scripts developed by Iva Dimitrova](https://github.com/uga-libraries/aip-mac-bash-mediainfo). 
+These were used by the Russell Library for making AV AIPs from 2017 to 2019.
