@@ -5,20 +5,22 @@ Dependencies: bagit.py, md5deep, mediainfo, saxon, xmllint
 
 Prior to running the script:
 
-    1. The contents of each AIP should be in a folder named with the AIP title (Russell) or AIP ID_Title (Hargrett).
+    1. The contents of each AIP should be in a folder.
     2. Each AIP folder should contain all media or all metadata files.
     3. All AIP folders should be in a single folder (AIPs directory).
+    4. Make a metadata.csv file and save in the AIPs directory.
 
 Script steps:
 
     1. Verifies the script argument (AIPs directory) is correct.
-    2. Makes folders for script outputs within the AIPs directory.
-    3. Deletes unwanted file types.
-    4. Determines the department, AIP ID, and AIP title from the AIP folder and file formats.
-    5. Organizes the AIP contents into the AIP directory structure.
-    6. Extracts technical metadata using MediaInfo.
-    7. Converts technical metadata to Dublin Core and PREMIS (preservation.xml) using a stylesheet.
-    8. Packages the AIPs: bag, tar, and zip.
+    2. Verifies the metadata.csv is in the AIPs directory and is correct; reads the metadata.csv.
+    3. Makes folders for script outputs within the AIPs directory.
+    For each AIP:
+        4. Deletes unwanted file types.
+        5. Organizes the AIP contents into the AIP directory structure.
+        6. Extracts technical metadata using MediaInfo.
+        7. Converts technical metadata to Dublin Core and PREMIS (preservation.xml) using a stylesheet.
+        8. Packages the AIPs: bag, tar, and zip.
     9. Makes a md5 manifest of all packaged AIPs.
 
 The script also generates a log of the AIPs processed and their final status, either an anticipated error or "complete".
