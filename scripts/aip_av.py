@@ -226,7 +226,8 @@ def preservation_xml(aip_md):
     pres_xml = f'{aip_md.AIP_ID}/metadata/{aip_md.AIP_ID}_preservation.xml'
 
     # Arguments to add to the saxon command.
-    args = f'aip-id={aip_md.AIP_ID} department={aip_md.Department} title="{aip_md.Title}" namespace={NAMESPACE}'
+    args = (f'aip-id={aip_md.AIP_ID} collection-id={aip_md.Collection} department={aip_md.Department} '
+            f'title="{aip_md.Title}" version={aip_md.Version} namespace={NAMESPACE}')
 
     # Makes the preservation.xml file from the mediainfo.xml using a stylesheet and saves it to the AIP's metadata
     # folder. If the mediainfo.xml is not present, moves the AIP to an error folder and ends this function.
