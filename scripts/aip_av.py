@@ -39,8 +39,16 @@ from configuration import *
 
 
 def log(aip, message):
-    """Saves the AIP name and a message (the error or that processing completed) to the log file,
-    which is a CSV saved in the AIPs directory. """
+    """Save the AIP name and a message (the error or that processing completed) to the log file
+
+    The log is a CSV saved in the AIPs directory.
+
+    Parameters:
+        aip: AIP_ID
+        message: string to include in the log
+
+    Returns: None
+    """
 
     with open('log.csv', 'a', newline='') as log_file:
         log_writer = csv.writer(log_file)
@@ -48,8 +56,17 @@ def log(aip, message):
 
 
 def move_error(error_name, aip):
-    """Moves the AIP folder to an error folder, named with the error, so the rest of the workflow steps are not run on
-    the AIP. Also adds the AIP and the error to a log for easier staff review."""
+    """Move the AIP folder to an error folder and add to the log for easier staff review
+
+    The error folder is named with the error.
+    The AIP is moved so the rest of the workflow steps are not run on this folder.
+
+    Parameters:
+        error_name: string describing the error
+        aip: AIP_ID
+
+    Returns: None
+    """
 
     # Makes the error folder, if it does not already exist, and moves the AIP to that folder.
     if not os.path.exists(f'errors/{error_name}'):
@@ -158,7 +175,13 @@ def metadata_csv(aips_dir):
 
 
 def delete_files(aip_folder_name):
-    """Deletes unwanted files based on their file extension."""
+    """Deletes unwanted files based on their file extension.
+
+    Parameters:
+        aip_folder_name: name of the folder being made into an AIP, prior to renaming to AIP_ID
+
+    Returns: None
+    """
 
     # Deletes files if the file extension is not in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
@@ -174,8 +197,17 @@ def delete_files(aip_folder_name):
 
 
 def aip_directory(aip_folder_name, aip):
-    """Makes the AIP directory structure (objects and metadata folder within the AIP folder),
-    moves the digital objects to the objects folder, and renames the AIP folder to the AIP ID. """
+    """Make the AIP directory structure and rename the AIP folder ot the AIP ID.
+
+    AIP directory is objects and metadata folder within the AIP folder,
+    and all the digital objects to the objects folder.
+
+    Parameters:
+        aip_folder_name: name of the folder being made into an AIP, prior to renaming to AIP_ID
+        aip: AIP_ID
+
+    Returns: None
+    """
 
     # Makes the objects folder within the AIP folder, if it doesn't exist. If there is already a folder named objects
     # in the first level within the AIP folder, moves the AIP to an error folder and ends this function. Do not want
@@ -201,8 +233,15 @@ def aip_directory(aip_folder_name, aip):
 
 
 def mediainfo(aip):
-    """Extracts technical metadata from the files in the objects folder using MediaInfo."""
-    # KNOWN ISSUE: mediainfo can identify PDF versions but only identifies OHMS xml by the file extension.
+    """Extract technical metadata from the files in the objects folder using MediaInfo.
+
+    Known Issue: mediainfo can identify PDF versions but only identifies OHMS xml by the file extension.
+
+    Parameters:
+        aip: AIP_ID
+
+    Returns: None
+    """
 
     # Runs MediaInfo on the contents of the objects folder and saves the XML output to the metadata folder.
     # --'Output=XML' uses the XML structure that started with MediaInfo 18.03
@@ -220,7 +259,13 @@ def mediainfo(aip):
 
 
 def preservation_xml(aip_md):
-    """Creates PREMIS and Dublin Core metadata from the MediaInfo XML and saves it as a preservation.xml file."""
+    """Create PREMIS and Dublin Core metadata from the MediaInfo XML and save it as a preservation.xml file
+
+    Parameters:
+        aip_md: Data from all columns of the metadata.csv for one AIP
+
+    Returns: None
+    """
 
     # Paths to files used in the saxon command.
     media_xml = f'{aip_md.AIP_ID}/metadata/{aip_md.AIP_ID}_mediainfo.xml'
@@ -261,7 +306,14 @@ def preservation_xml(aip_md):
 
 
 def package(aip, aip_folder):
-    """Bags, tars, and zips the AIP. Renames the AIP folder to AIPID_bag."""
+    """Bag, tar, and zip the AIP and renames the AIP folder to AIPID_bag.
+
+    Parameters:
+        aip: AIP_ID
+        aip_folder: name of the folder being made into an AIP, prior to renaming to AIP_ID
+
+    Returns: None
+    """
 
     # Deletes any .DS_Store files because they cause errors with bag validation. They would have been deleted by
     # delete_files() earlier in the script, but can be regenerated while the script is running.
