@@ -91,8 +91,6 @@ The naming convention is not required for the script now that metadata.csv is im
 
 ## Workflow Details
 
-See also the [graphical representation of this workflow](https://github.com/uga-libraries/av-aip_russell/blob/main/Russell%20AV%20Preservation%20Script%20Flow%20Diagram.png).
-
 1. Deletes files that do not have any of the expected file extensions (.dv, .m4a, .mov, .mp3, .mp4, .wav, .pdf, or .xml) from the AIP folder.
 2. Verifies the metadata.csv is in the AIPs directory and is correct; reads the metadata.csv.
 3. Makes folders for script outputs within the AIPs directory.
