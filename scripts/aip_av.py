@@ -16,12 +16,13 @@ Script steps:
     2. Verifies the metadata.csv is in the AIPs directory and is correct; reads the metadata.csv.
     3. Makes folders for script outputs within the AIPs directory.
     For each AIP:
-        4. Deletes unwanted file types.
-        5. Organizes the AIP contents into the AIP directory structure.
-        6. Extracts technical metadata using MediaInfo.
-        7. Converts technical metadata to Dublin Core and PREMIS (preservation.xml) using a stylesheet.
-        8. Packages the AIPs: bag, tar, and zip.
-    9. Makes a md5 manifest of all packaged AIPs.
+        4. Renames folder to the AIP ID.
+        5. Deletes unwanted file types.
+        6. Organizes the AIP contents into the AIP directory structure.
+        7. Extracts technical metadata using MediaInfo.
+        8. Converts technical metadata to Dublin Core and PREMIS (preservation.xml) using a stylesheet.
+        9. Packages the AIPs: bag, tar, and zip.
+    10. Makes a md5 manifest of all packaged AIPs.
 
 The script also generates a log of the AIPs processed and their final status, either an anticipated error or "complete".
 """

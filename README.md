@@ -96,21 +96,22 @@ The naming convention is not required for the script now that metadata.csv is im
 3. Makes folders for script outputs within the AIPs directory.
 
 For each AIP:
-4. Deletes unwanted file types based on the file extension.
-5. Organizes the folder into the AIP directory structure:
+4. Renames folder to the AIP ID.
+5. Deletes unwanted file types based on the file extension.
+6. Organizes the folder into the AIP directory structure:
     1. Makes a folder named objects and moves all files and folders into it.
     2. Makes a folder named metadata for script outputs.
     3. Renames the AIP folder to the AIP ID.
-6. Extracts technical metadata using MediaInfo and saves the result in the metadata folder.
-7. Converts technical metadata to Dublin Core and PREMIS (preservation.xml)
+7. Extracts technical metadata using MediaInfo and saves the result in the metadata folder.
+8. Converts technical metadata to Dublin Core and PREMIS (preservation.xml)
    1. Makes the preservation.xml with saxon and xslt.
    2. Validates the preservation.xml with xmllint and xsd.
-8. Packages the AIP
+9. Packages the AIP
    1. Deletes .DS_Store that have been auto-generated while the script is running.
    2. Bags the AIP in place with md5 and sha256 manifests with bagit.py.
    3. Validates the bag with bagit.py.
    4. Runs the perl script prepare_bag on the AIP to tar and zip it and saves output to aips-ready-to-ingest. 
-9. When all AIPs are processed, makes a md5 manifest of the packaged AIPs in the aips-to-ingest folder using md5sum.
+10. When all AIPs are processed, makes a md5 manifest of the packaged AIPs in the aips-to-ingest folder using md5sum.
 
 ## Initial Author
 Adriane Hanson, Head of Digital Stewardship, January 2020
