@@ -174,11 +174,11 @@ def metadata_csv(aips_dir):
     return metadata_df, error_list
 
 
-def delete_files(aip_folder_name):
+def delete_files(aip):
     """Deletes unwanted files based on their file extension.
 
     Parameters:
-        aip_folder_name: name of the folder being made into an AIP, prior to renaming to AIP_ID
+        aip: AIP_ID
 
     Returns: None
     """
@@ -186,24 +186,23 @@ def delete_files(aip_folder_name):
     # Deletes files if the file extension is not in the keep list.
     # Using a lowercase version of filename so the match isn't case sensitive.
     keep = ['.dv', '.m4a', '.mkv', '.mov', '.mp3', '.mp4', '.wav', '.pdf', '.xml']
-    for root, directories, files in os.walk(aip_folder_name):
+    for root, directories, files in os.walk(aip):
         for file in files:
             if not (any(file.lower().endswith(s) for s in keep)):
                 os.remove(f'{root}/{file}')
 
     # If deleting the unwanted files left the AIP folder empty, moves the AIP to an error folder.
-    if len(os.listdir(aip_folder_name)) == 0:
-        move_error("all_files_deleted", aip_folder_name)
+    if len(os.listdir(aip)) == 0:
+        move_error("all_files_deleted", aip)
 
 
-def aip_directory(aip_folder_name, aip):
-    """Make the AIP directory structure and rename the AIP folder ot the AIP ID.
+def aip_directory(aip):
+    """Make the AIP directory structure
 
     AIP directory is objects and metadata folder within the AIP folder,
     and all the digital objects to the objects folder.
 
     Parameters:
-        aip_folder_name: name of the folder being made into an AIP, prior to renaming to AIP_ID
         aip: AIP_ID
 
     Returns: None
@@ -213,23 +212,20 @@ def aip_directory(aip_folder_name, aip):
     # in the first level within the AIP folder, moves the AIP to an error folder and ends this function. Do not want
     # to alter the original directory structure by adding to an original folder named objects.
     try:
-        os.mkdir(f'{aip_folder_name}/objects')
+        os.mkdir(f'{aip}/objects')
     except FileExistsError:
-        move_error('preexisting_objects_folder', aip_folder_name)
+        move_error('preexisting_objects_folder', aip)
         return
 
     # Moves the contents of the AIP folder into the objects folder.
-    for item in os.listdir(aip_folder_name):
+    for item in os.listdir(aip):
         if item == 'objects':
             continue
-        os.replace(f'{aip_folder_name}/{item}', f'{aip_folder_name}/objects/{item}')
+        os.replace(f'{aip}/{item}', f'{aip}/objects/{item}')
 
     # Makes the metadata folder within the AIP folder.
     # Do not have to check if it already exists since everything is moved to the objects folder in the previous step.
-    os.mkdir(f'{aip_folder_name}/metadata')
-
-    # Renames the AIP folder to the AIP ID.
-    os.replace(aip_folder_name, aip)
+    os.mkdir(f'{aip}/metadata')
 
 
 def mediainfo(aip):
@@ -393,14 +389,17 @@ for aip_row in aip_metadata_df.itertuples():
     current_aip += 1
     print(f'\n>>>Processing {aip_row.Folder} ({current_aip} of {total_aips}).')
 
+    # Renames the AIP folder to the AIP ID.
+    os.replace(aip_row.Folder, aip_row.AIP_ID)
+
     # Deletes undesired files based on the file extension.
     if aip_row.Folder in os.listdir('.'):
-        delete_files(aip_row.Folder)
+        delete_files(aip_row.AIP_ID)
 
     # Organizes the AIP folder contents into the AIP directory structure
     # and renames the AIP folder to the AIP ID.
     if aip_row.Folder in os.listdir('.'):
-        aip_directory(aip_row.Folder, aip_row.AIP_ID)
+        aip_directory(aip_row.AIP_ID)
 
     # Extracts technical metadata from the files using MediaInfo.
     if aip_row.AIP_ID in os.listdir('.'):
