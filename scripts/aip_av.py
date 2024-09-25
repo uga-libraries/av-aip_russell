@@ -44,7 +44,7 @@ def log(aip, message):
     The log is a CSV saved in the AIPs directory.
 
     Parameters:
-        aip: AIP_ID
+        aip: AIP ID
         message: string to include in the log
 
     Returns: None
@@ -55,7 +55,7 @@ def log(aip, message):
         log_writer.writerow([aip, message])
 
 
-def move_error(error_name, aip):
+def move_error(error_name, aip_folder):
     """Move the AIP folder to an error folder and add to the log for easier staff review
 
     The error folder is named with the error.
@@ -63,7 +63,8 @@ def move_error(error_name, aip):
 
     Parameters:
         error_name: string describing the error
-        aip: AIP_ID
+        aip_folder: name of the folder being made into an AIP,
+                    typically the AIP ID but could be AIPID_bag
 
     Returns: None
     """
@@ -71,10 +72,15 @@ def move_error(error_name, aip):
     # Makes the error folder, if it does not already exist, and moves the AIP to that folder.
     if not os.path.exists(f'errors/{error_name}'):
         os.makedirs(f'errors/{error_name}')
-    os.replace(aip, f'errors/{error_name}/{aip}')
+    os.replace(aip_folder, f'errors/{error_name}/{aip_folder}')
 
     # Adds the error to a log in the AIPs directory.
-    log(aip, error_name)
+    # If the error is from bag, calculates the AIP ID (everything except _bag).
+    # Otherwise, aip_folder is already the AIP ID.
+    if error_name == 'bag_invalid':
+        log(aip_folder[:-4], error_name)
+    else:
+        log(aip_folder, error_name)
 
 
 def check_argument(argument_list):
@@ -178,7 +184,7 @@ def delete_files(aip):
     """Deletes unwanted files based on their file extension.
 
     Parameters:
-        aip: AIP_ID
+        aip: AIP ID
 
     Returns: None
     """
@@ -203,7 +209,7 @@ def aip_directory(aip):
     and all the digital objects to the objects folder.
 
     Parameters:
-        aip: AIP_ID
+        aip: AIP ID
 
     Returns: None
     """
@@ -234,7 +240,7 @@ def mediainfo(aip):
     Known Issue: mediainfo can identify PDF versions but only identifies OHMS xml by the file extension.
 
     Parameters:
-        aip: AIP_ID
+        aip: AIP ID
 
     Returns: None
     """
@@ -301,12 +307,11 @@ def preservation_xml(aip_md):
         shutil.copy2(pres_xml, 'preservation-xml')
 
 
-def package(aip, aip_folder):
+def package(aip):
     """Bag, tar, and zip the AIP and renames the AIP folder to AIPID_bag.
 
     Parameters:
-        aip: AIP_ID
-        aip_folder: name of the folder being made into an AIP, prior to renaming to AIP_ID
+        aip: AIP ID
 
     Returns: None
     """
@@ -345,7 +350,7 @@ def package(aip, aip_folder):
     subprocess.run(f'perl "{PREPARE_BAG}" "{bag_name}" aips-to-ingest', shell=True)
 
     # Adds the AIP to the log for successfully completing, since this function is the last step.
-    log(aip_folder, "Complete")
+    log(aip, "Complete")
 
 
 # Verifies the required script argument (aips_directory) is correct.
@@ -378,7 +383,7 @@ for directory in ['mediainfo-xml', 'preservation-xml', 'aips-to-ingest']:
         os.mkdir(directory)
 
 # Makes a log file, with a header row, in the AIPs directory.
-log("AIP Folder", "Status")
+log("AIP_ID", "Status")
 
 # For one AIP at a time (based on the rows in the metadata csv), runs the functions for all workflow steps.
 # If a known error occurs, the AIP is moved to a folder with the error name and the next AIP is started.
