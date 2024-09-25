@@ -39,13 +39,11 @@ from configuration import *
 
 
 def log(aip, message):
-    """Save the AIP name and a message (the error or that processing completed) to the log file
-
-    The log is a CSV saved in the AIPs directory.
+    """Save the AIP ID and a message to the log file, a CSV in the AIPs directory
 
     Parameters:
         aip: AIP ID
-        message: string to include in the log
+        message: string to include in the log, either the error or that processing completed
 
     Returns: None
     """
@@ -398,12 +396,12 @@ for aip_row in aip_metadata_df.itertuples():
     os.replace(aip_row.Folder, aip_row.AIP_ID)
 
     # Deletes undesired files based on the file extension.
-    if aip_row.Folder in os.listdir('.'):
+    if aip_row.AIP_ID in os.listdir('.'):
         delete_files(aip_row.AIP_ID)
 
     # Organizes the AIP folder contents into the AIP directory structure
     # and renames the AIP folder to the AIP ID.
-    if aip_row.Folder in os.listdir('.'):
+    if aip_row.AIP_ID in os.listdir('.'):
         aip_directory(aip_row.AIP_ID)
 
     # Extracts technical metadata from the files using MediaInfo.
@@ -416,7 +414,7 @@ for aip_row in aip_metadata_df.itertuples():
 
     # Bags the AIP, validates the bag, and tars and zips the AIP.
     if aip_row.AIP_ID in os.listdir('.'):
-        package(aip_row.AIP_ID, aip_row.Folder)
+        package(aip_row.AIP_ID)
 
 # Makes a MD5 manifest of all packaged AIPs for each department in the aips-to-ingest folder using md5sum.
 # The manifest has one line per AIP, formatted md5<tab>filename
