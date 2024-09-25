@@ -1,11 +1,16 @@
 # Script Testing Instructions
 
-Use the following instructions for thoroughly testing the aip_av.py script after making changes to verify it still works correctly with AIPs in the expected format and still catches all anticipated errors. In all scenarios, the script should print "Script is finished running." just before it ends. If it does not, that means an error was not handled correctly. 
+Use the following instructions for thoroughly testing the aip_av.py script after making changes 
+to verify it still works correctly with AIPs in the expected format and still catches all anticipated errors. 
+In all scenarios, the script should print "Script is finished running." just before it ends. 
+If it does not, that means an error was not handled correctly. 
 
 ## Testing Valid AIPs
 
 ### AIPs to include in the test suite
-For each scenario, make one media and one metadata AIP. At least one media and metadata AIP should have the same base AIP ID, e.g., har-ua20-123_0001_media and harg-ua20-123_0001_metadata.
+For each scenario, make one media and one metadata AIP. 
+At least one media and metadata AIP should have the same base AIP ID, 
+e.g., har-ua20-123_0001_media and harg-ua20-123_0001_metadata.
 
 * An AIP with one file in an accepted format.
 * An AIP with at least one file, and sometimes multiple files, in each of the accepted formats.
@@ -52,20 +57,32 @@ Run the script on AIPs 1-5, which should result in the following:
 * The error "Could not make manifest. aips-to-ingest is empty." is displayed in the terminal.
 * All AIPs are in the log with a status matching the error folder name.
 
-Use AIPs 6-7 for the remaining tests, which require editing the code to force errors to occur. Run the tests one at a time, undoing the change to the code required for one test before making the change for the next test. When testing is complete, run the script on a valid AIP folder to confirm that all changes for the tests have removed correctly from the script.
+Use AIPs 6-7 for the remaining tests, which require editing the code to force errors to occur. 
+Run the tests one at a time, undoing the change to the code required for one test before making the change for the next test. 
+When testing is complete, run the script on a valid AIP folder to confirm that all changes for the tests have removed correctly from the script.
 
-In each scenario, verify the log has the correct status for the AIPs and that no manifest is made in addition to verifying the expected results detailed in each test description.
+In each scenario, verify the log has the correct status for the AIPs and that no manifest is made 
+in addition to verifying the expected results detailed in each test description.
 
-* Save a copy of the mediainfo.xml files for both AIPs to the mediainfo-xml folder prior to running the script. The AIPs should be in an error folder named "preexisting_mediainfo_copy". They will have a mediainfo.xml file, but not a preservation.xml file, in the AIP metadata folder. The mediainfo.xml files that were in the mediainfo-xml folder should not be overwritten.
+* Save a copy of the mediainfo.xml files for both AIPs to the mediainfo-xml folder prior to running the script. 
+  The AIPs should be in an error folder named "preexisting_mediainfo_copy". 
+  They will have a mediainfo.xml file, but not a preservation.xml file, in the AIP metadata folder. 
+  The mediainfo.xml files that were in the mediainfo-xml folder should not be overwritten.
 
 
-* Comment out the following code in the aip_av.py script, which is towards the end of the script, so it does not run. The AIPs should be in an error folder named "no_mediainfo_xml". No mediainfo.xml or preservation.xml files will be made.
+* Comment out the following code in the aip_av.py script, which is towards the end of the script, so it does not run. 
+  The AIPs should be in an error folder named "no_mediainfo_xml". No mediainfo.xml or preservation.xml files will be made.
     ```
     # Extracts technical metadata from the files using MediaInfo.
     if aip_folder in os.listdir('.'):
         mediainfo(aip_folder, aip_id, aip_type)
 
-* Replace the first template in the mediainfo-to-preservation.xslt file with the following code to create invalid preservation.xml. The AIPs should be in an error folder named "preservation_invalid". There should also be a text file for each AIP in the error folder with the error messages from validating, which include that the values for title and rights are not valid and that the element "error" is not expected. The AIP metadata folders will contain the mediainfo.xml and preservation.xml files. The mediainfo-xml folder will contain the mediainfo.xml files, and the preservation-xml folder will be empty.
+* Replace the first template in the mediainfo-to-preservation.xslt file with the following code to create invalid preservation.xml. 
+  The AIPs should be in an error folder named "preservation_invalid". 
+  There should also be a text file for each AIP in the error folder with the error messages from validating, 
+  which include that the values for title and rights are not valid and that the element "error" is not expected. 
+  The AIP metadata folders will contain the mediainfo.xml and preservation.xml files. 
+  The mediainfo-xml folder will contain the mediainfo.xml files, and the preservation-xml folder will be empty.
     
    ```
    <xsl:template match="/">
@@ -87,7 +104,13 @@ In each scenario, verify the log has the correct status for the AIPs and that no
       </preservation>
    </xsl:template>
 
-* Edit the package() function in aip_av.py as shown below to add a line of code prior to bag validation to delete the SHA256 manifest and cause the script to create invalid bags. The AIPs should be in an error folder named "bag_invalid". There should also be a text file for each AIP in the error folder with the error messages from validating, which include a warning that manifest-sha256.txt exists in the manifest but not the file system and checksum validation errors for sha256 and md5 for manifest-sha256.txt. There will be a mediainfo.xml and preservation.xml file in the AIP metadata folder and script output folders.
+* Edit the package() function in aip_av.py as shown below to add a line of code prior to bag validation 
+  to delete the SHA256 manifest and cause the script to create invalid bags. 
+  The AIPs should be in an error folder named "bag_invalid". 
+  There should also be a text file for each AIP in the error folder with the error messages from validating, 
+  which include a warning that manifest-sha256.txt exists in the manifest but not the file system 
+  and checksum validation errors for sha256 and md5 for manifest-sha256.txt.
+  There will be a mediainfo.xml and preservation.xml file in the AIP metadata folder and script output folders.
   
   ```
   # Validates the bag. If the bag is not valid, moves the AIP to an error folder, saves the validation error to a document in the error folder, and ends this function.
