@@ -368,8 +368,8 @@ os.chdir(aips_directory)
 aip_metadata_df, errors = metadata_csv(aips_directory)
 if len(errors) > 0:
     print("Problem with the metadata.csv. Correct the following error(s) and run the script again.")
-    for error in errors:
-        print('\n*', error)
+    for error_msg in errors:
+        print('\n*', error_msg)
     sys.exit()
 
 # Starts counts for tracking the script progress.
