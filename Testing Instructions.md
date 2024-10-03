@@ -33,8 +33,7 @@ e.g., har-ua20-123_0001_media and harg-ua20-123_0001_metadata.
 
 1. An AIP that only contains files in unaccepted formats.
 2. An AIP with a folder named "objects" within the AIP folder.
-3. An AIP that is correct, but the metadata.csv has values that will cause the preservation.xml to be invalid.
-4-5. The media and metadata versions of an AIP that is correct to use when tests involve changing the script.
+3. An AIP that is correct to use for test that require changing the script.
 
 ### Things to check for
 
@@ -52,15 +51,14 @@ Each should cause an error message to display in the terminal and the script to 
 * There are AIP folders in the metadata.csv that are not in the aips_directory.
 * There are AIP folders in the aips_directory that are not in the metadata.csv.
 
-Run the script on AIPs 1-3, which should result in the following:    
+Run the script on AIPs 1-2, which should result in the following:    
 * AIP 1 is in an error folder named "all_files_deleted", and the AIP folder is empty.
-* AIP 2 is in an error folder named "preexisting_objects_folder", and the contents are unchanged.
-* AIP 3 is in an error folder named "preservation_invalid", which also contains a text file with the errors.  
+* AIP 2 is in an error folder named "preexisting_objects_folder", and the contents are unchanged. 
 * The aips-to-ingest, mediainfo-xml, and preservation-xml folders are empty.
 * The error "Could not make manifest. aips-to-ingest is empty." is displayed in the terminal.
 * All AIPs are in the log with a status matching the error folder name.
 
-Use AIPs 4-5 for the remaining tests, which require editing the code to force errors to occur. 
+Use AIP 3 for the remaining tests, which require editing the code to force errors to occur. 
 Run the tests one at a time, undoing the change to the code required for one test before making the change for the next test. 
 When testing is complete, run the script on a valid AIP folder to confirm that all changes for the tests have removed correctly from the script.
 
@@ -79,6 +77,11 @@ in addition to verifying the expected results detailed in each test description.
     # Extracts technical metadata from the files using MediaInfo.
     if aip_folder in os.listdir('.'):
         mediainfo(aip_folder, aip_id, aip_type)
+
+* Edit the mediainfo-to-preservation.xslt to make an invalid preservation.xml. 
+  Edit <dc:rights> so the supplied value is not a URL and delete required field <xsl:call-template name="aip-id"/> .
+  The AIP should be in an error folder named "preservation_invalid".
+  That folder will also contain a file with the preservation xml validation error.
 
 * Edit the package() function in aip_av.py as shown below to add a line of code prior to bag validation 
   to delete the SHA256 manifest and cause the script to create invalid bags. 
