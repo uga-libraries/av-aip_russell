@@ -42,16 +42,21 @@ See "Script Input" (below) for details on the AIPs directory.
 
 ## Dependencies
 * Mac or Linux operating system
-* [bagit.py](https://github.com/LibraryOfCongress/bagit-python)
+* [bagit.py](https://github.com/LibraryOfCongress/bagit-python) or `pip install bagit`
+* [Java](https://www.java.com/en/) - for Saxon
 * [MediaInfo](https://mediaarea.net/en/MediaInfo)
-* [saxon9he](http://saxon.sourceforge.net/)
+* [md5sum](https://blog.bhanunadar.com/how-to-install-md5sum-on-macos-a-step-by-step-guide)
+* [saxon9he](https://www.saxonica.com/download/download_page.xml) - Java version
 * [xmllint](http://xmlsoft.org/xmllint.html)
 
 ## Installation
-1. Install the dependencies (listed above). Saxon may come with your OS.
+1. Install the dependencies (listed above). Saxon and xmllint may come with your OS.
 2. Download this repository and save to your computer.
 3. Use the configuration_template.py to make a file named configuration.py with file path variables for your local machine.
 4. Change permissions on the scripts so they are executable.
+
+When running bagit, if you get a ModuleNotFound error for pkg_resources,
+fix by running `pip install setuptools`
 
 ## Script Input (AIPS Directory)
 The content to be transformed into AIPs must be in a single folder, which is the AIPs directory. 
