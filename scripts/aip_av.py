@@ -335,7 +335,7 @@ def package(aip):
     # document in the error folder, and ends this function.
     validate = subprocess.run(f'bagit.py --validate "{bag_name}"', stderr=subprocess.PIPE, shell=True)
 
-    if 'invalid' in str(validate):
+    if 'bag is valid' not in str(validate):
         move_error('bag_invalid', bag_name)
         with open(f'errors/bag_invalid/{bag_name}_bag_validation_error.txt', 'a') as error:
             lines = str(validate.stderr).split(';')
