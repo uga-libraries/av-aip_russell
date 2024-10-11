@@ -161,9 +161,10 @@ def metadata_csv(aips_dir):
         error_list.append(f"Folder(s) in metadata.csv more than once: {'; '.join(dup_error)}.")
 
     # Makes a dataframe of folders in the aips_directory (current directory), for comparing to the metadata.csv.
+    # Ignores .DS_Store, which may be in aips_directory but should not be in metadata.csv.
     aips_dir_list = []
     for item in os.listdir('.'):
-        if not item == 'metadata.csv':
+        if item not in ('.DS_Store', 'metadata.csv'):
             aips_dir_list.append(item)
     aips_dir_df = pd.DataFrame(aips_dir_list, columns=['Folder_Dir'])
 
